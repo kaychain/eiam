@@ -26,4 +26,6 @@
     <include file="db/1.0.0-changelog.xml" relativeToChangelogFile="false"/>
     <!-- 引入Quartz -->
     <include file="org/quartz/impl/jdbcjobstore/liquibase.quartz.init.xml" relativeToChangelogFile="false"/>
+    <!-- 1.1.0 -->
+    <include file="db/1.1.0-changelog.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

@@ -17,6 +17,7 @@
  */
 package cn.topiam.employee.common.repository.app;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
@@ -47,12 +48,14 @@ public interface AppPermissionRoleRepository extends
      * 更新角色状态
      *
      * @param id      {@link String}
+     * @param appId      {@link Long}
      * @param enabled {@link String}
      */
     @Transactional(rollbackFor = Exception.class)
     @Modifying
-    @Query(value = "update app_permission_role set is_enabled = ?2 where id_ = ?1", nativeQuery = true)
-    void updateStatus(@Param(value = "id") String id, @Param(value = "enabled") Boolean enabled);
+    @Query(value = "update app_permission_role set is_enabled = ?3 where id_ = ?1 and app_id = ?2", nativeQuery = true)
+    void updateStatus(@Param(value = "id") String id, @Param(value = "appId") Long appId,
+                      @Param(value = "enabled") Boolean enabled);
 
     /**
      * findByIdContainsDeleted
@@ -64,4 +67,22 @@ public interface AppPermissionRoleRepository extends
     @Cacheable
     @Query(value = "SELECT * FROM app_permission_role WHERE id_ = :id", nativeQuery = true)
     Optional<AppPermissionRoleEntity> findByIdContainsDeleted(@NotNull @Param(value = "id") Long id);
+
+    /**
+     * 根据id和app id查询应用角色
+     *
+     * @param id {@link Long}
+     * @param appId {@link Long}
+     * @return {@link AppPermissionRoleEntity}
+     */
+    Optional<AppPermissionRoleEntity> findByIdAndAppId(@NotNull Long id, @NotNull Long appId);
+
+    /**
+     *
+     * @param ids {@link List<Long>}
+     * @param appId {@link Long}
+     * @return {@link List<AppPermissionRoleEntity>}
+     */
+    Optional<List<AppPermissionRoleEntity>> findByIdInAndAppId(@NotNull List<Long> ids,
+                                                               @NotNull Long appId);
 }

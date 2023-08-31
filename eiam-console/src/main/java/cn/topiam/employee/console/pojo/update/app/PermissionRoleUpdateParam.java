@@ -40,9 +40,15 @@ public class PermissionRoleUpdateParam implements Serializable {
     /**
      * ID
      */
-    @Schema(accessMode = READ_ONLY)
+    @Schema(accessMode = READ_ONLY, description = "ID")
     @NotBlank(message = "ID不能为空")
     private String            id;
+    /**
+     * App ID
+     */
+    @Schema(accessMode = READ_ONLY, description = "App Id")
+    @NotBlank(message = "App ID不能为空")
+    private String            appId;
     /**
      * 名称
      */

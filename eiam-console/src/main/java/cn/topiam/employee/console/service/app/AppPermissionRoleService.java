@@ -66,9 +66,10 @@ public interface AppPermissionRoleService {
      * 删除角色
      *
      * @param ids {@link String}
+     * @param appId {@link Long}
      * @return {@link Boolean}
      */
-    boolean deletePermissionRole(String ids);
+    boolean deletePermissionRole(String ids, Long appId);
 
     /**
      * 角色详情
@@ -93,8 +94,9 @@ public interface AppPermissionRoleService {
      * 更新角色状态
      *
      * @param id     {@link String}
+     * @param appId     {@link String}
      * @param status {@link Boolean}
      * @return {@link Boolean}
      */
-    Boolean updatePermissionRoleStatus(String id, Boolean status);
+    Boolean updatePermissionRoleStatus(String id, Long appId, Boolean status);
 }

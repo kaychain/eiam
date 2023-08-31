@@ -119,11 +119,12 @@ public class AppPermissionRoleController {
     @Preview
     @Operation(summary = "删除角色")
     @Audit(type = EventType.DELETE_APP_PERMISSION_ROLE)
-    @DeleteMapping(value = "/delete/{ids}")
+    @DeleteMapping(value = "/delete/{ids}/app_id/{appId}")
     @PreAuthorize(value = "authenticated and @sae.hasAuthority(T(cn.topiam.employee.support.security.userdetails.UserType).ADMIN)")
-    public ApiRestResult<Boolean> deletePermissionRole(@PathVariable(value = "ids") String ids) {
+    public ApiRestResult<Boolean> deletePermissionRole(@PathVariable(value = "ids") String ids,
+                                                       @PathVariable(value = "appId") Long appId) {
         return ApiRestResult.<Boolean> builder()
-            .result(appPermissionRoleService.deletePermissionRole(ids)).build();
+            .result(appPermissionRoleService.deletePermissionRole(ids, appId)).build();
     }
 
     /**
@@ -145,15 +146,18 @@ public class AppPermissionRoleController {
      * 启用角色
      *
      * @param id {@link String}
+     * @param appId {@link Long}
      * @return {@link Boolean}
      */
     @Lock
     @Preview
     @Operation(summary = "启用角色")
-    @PutMapping(value = "/enable/{id}")
+    @PutMapping(value = "/enable/{id}/app_id/{appId}")
     @PreAuthorize(value = "authenticated and @sae.hasAuthority(T(cn.topiam.employee.support.security.userdetails.UserType).ADMIN)")
-    public ApiRestResult<Boolean> enablePermissionRole(@PathVariable(value = "id") String id) {
-        Boolean result = appPermissionRoleService.updatePermissionRoleStatus(id, Boolean.TRUE);
+    public ApiRestResult<Boolean> enablePermissionRole(@PathVariable(value = "id") String id,
+                                                       @PathVariable(value = "appId") Long appId) {
+        Boolean result = appPermissionRoleService.updatePermissionRoleStatus(id, appId,
+            Boolean.TRUE);
         return ApiRestResult.<Boolean> builder().result(result).build();
     }
 
@@ -161,15 +165,18 @@ public class AppPermissionRoleController {
      * 禁用角色
      *
      * @param id {@link String}
+     * @param appId {@link Long}
      * @return {@link Boolean}
      */
     @Lock
     @Preview
     @Operation(summary = "禁用角色")
-    @PutMapping(value = "/disable/{id}")
+    @PutMapping(value = "/disable/{id}/app_id/{appId}")
     @PreAuthorize(value = "authenticated and @sae.hasAuthority(T(cn.topiam.employee.support.security.userdetails.UserType).ADMIN)")
-    public ApiRestResult<Boolean> disablePermissionRole(@PathVariable(value = "id") String id) {
-        Boolean result = appPermissionRoleService.updatePermissionRoleStatus(id, Boolean.FALSE);
+    public ApiRestResult<Boolean> disablePermissionRole(@PathVariable(value = "id") String id,
+                                                        @PathVariable(value = "appId") Long appId) {
+        Boolean result = appPermissionRoleService.updatePermissionRoleStatus(id, appId,
+            Boolean.FALSE);
         return ApiRestResult.<Boolean> builder().result(result).build();
     }
 

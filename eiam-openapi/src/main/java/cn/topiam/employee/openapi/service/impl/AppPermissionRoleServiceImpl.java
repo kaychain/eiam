@@ -81,7 +81,7 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
     }
 
     /**
-     * 创建系统
+     * 创建角色
      *
      * @param param {@link AppPermissionRoleCreateParam}
      * @return {@link Boolean}
@@ -95,6 +95,8 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
     }
 
     /**
+     * 更新角色
+     *
      * @param param {@link PermissionRoleUpdateParam}
      * @return {@link Boolean}
      */
@@ -128,7 +130,7 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
     }
 
     /**
-     * 角色详情
+     * 获取角色详情
      *
      * @param id {@link Long}
      * @return {@link AppPermissionRoleResult}
@@ -150,7 +152,6 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
      * @param appId {@link Long}
      * @return {@link Boolean}
      */
-    @SuppressWarnings("DuplicatedCode")
     @Override
     public Boolean permissionRoleParamCheck(CheckValidityType type, String value, Long appId,
                                             Long id) {
@@ -187,12 +188,13 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
      * 更新角色状态
      *
      * @param id     {@link String}
+     * @param appId     {@link Long}
      * @param status {@link Boolean}
      * @return {@link Boolean}
      */
     @Override
-    public Boolean updatePermissionRoleStatus(String id, Boolean status) {
-        appPermissionRoleRepository.updateStatus(id, status);
+    public Boolean updatePermissionRoleStatus(String id, Long appId, Boolean status) {
+        appPermissionRoleRepository.updateStatus(id, appId, status);
         return true;
     }
 

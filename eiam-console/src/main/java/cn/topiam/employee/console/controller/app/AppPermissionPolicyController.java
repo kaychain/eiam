@@ -74,14 +74,14 @@ public class AppPermissionPolicyController {
     }
 
     /**
-     * 创建资源
+     * 创建策略
      *
      * @param param {@link AppPermissionRoleCreateParam}
      * @return {@link Boolean}
      */
     @Lock
     @Preview
-    @Operation(summary = "创建资源")
+    @Operation(summary = "创建策略")
     @PostMapping(value = "/create")
     @PreAuthorize(value = "authenticated and @sae.hasAuthority(T(cn.topiam.employee.support.security.userdetails.UserType).ADMIN)")
     public ApiRestResult<Boolean> createPolicy(@Validated @RequestBody AppPermissionPolicyCreateParam param) {
@@ -90,14 +90,14 @@ public class AppPermissionPolicyController {
     }
 
     /**
-     * 修改资源
+     * 修改策略
      *
      * @param param {@link PermissionRoleUpdateParam}
      * @return {@link Boolean}
      */
     @Lock
     @Preview
-    @Operation(summary = "修改资源")
+    @Operation(summary = "修改策略")
     @PutMapping(value = "/update/{id}")
     @PreAuthorize(value = "authenticated and @sae.hasAuthority(T(cn.topiam.employee.support.security.userdetails.UserType).ADMIN)")
     public ApiRestResult<Boolean> updatePolicy(@Validated AppPermissionPolicyUpdateParam param) {
@@ -106,14 +106,14 @@ public class AppPermissionPolicyController {
     }
 
     /**
-     * 删除资源
+     * 删除策略
      *
      * @param id {@link String}
      * @return {@link Boolean}
      */
     @Lock
     @Preview
-    @Operation(summary = "删除资源")
+    @Operation(summary = "删除策略")
     @DeleteMapping(value = "/delete/{id}")
     @PreAuthorize(value = "authenticated and @sae.hasAuthority(T(cn.topiam.employee.support.security.userdetails.UserType).ADMIN)")
     public ApiRestResult<Boolean> deletePermissionPolicy(@PathVariable(value = "id") String id) {
@@ -122,14 +122,14 @@ public class AppPermissionPolicyController {
     }
 
     /**
-     * 获取资源
+     * 获取策略
      *
      * @param id {@link String}
      * @return {@link Boolean}
      */
     @Lock
     @Preview
-    @Operation(summary = "获取资源信息")
+    @Operation(summary = "获取策略信息")
     @GetMapping(value = "/{id}")
     @PreAuthorize(value = "authenticated and @sae.hasAuthority(T(cn.topiam.employee.support.security.userdetails.UserType).ADMIN)")
     public ApiRestResult<AppPermissionPolicyGetResult> getPermissionPolicy(@PathVariable(value = "id") String id) {

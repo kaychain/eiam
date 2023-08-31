@@ -93,8 +93,9 @@ public interface AppPermissionRoleService {
      * 更新角色状态
      *
      * @param id     {@link String}
+     * @param appId     {@link Long}
      * @param status {@link Boolean}
      * @return {@link Boolean}
      */
-    Boolean updatePermissionRoleStatus(String id, Boolean status);
+    Boolean updatePermissionRoleStatus(String id, Long appId, Boolean status);
 }

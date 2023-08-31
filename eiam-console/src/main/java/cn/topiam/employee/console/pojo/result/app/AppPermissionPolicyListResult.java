@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
+ *获取授权列表
  *
  * @author TopIAM
  * Created by support@topiam.cn on  2022/9/9 23:33

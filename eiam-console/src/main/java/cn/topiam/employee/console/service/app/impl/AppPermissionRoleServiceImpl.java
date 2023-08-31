@@ -84,7 +84,7 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
     }
 
     /**
-     * 创建系统
+     * 创建角色
      *
      * @param param {@link AppPermissionRoleCreateParam}
      * @return {@link Boolean}
@@ -94,12 +94,16 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
         AppPermissionRoleEntity entity = appPermissionRoleConverter
             .roleCreateParamConvertToEntity(param);
         appPermissionRoleRepository.save(entity);
-        AuditContext.setTarget(Target.builder().id(entity.getId().toString())
-            .type(TargetType.APP_PERMISSION_ROLE).build());
+        AuditContext.setTarget(
+            Target.builder().id(entity.getId().toString()).type(TargetType.APP_PERMISSION_ROLE)
+                .build(),
+            Target.builder().id(param.getAppId().toString()).type(TargetType.APPLICATION).build());
         return true;
     }
 
     /**
+     * 更新角色
+     *
      * @param param {@link PermissionRoleUpdateParam}
      * @return {@link Boolean}
      */
@@ -108,11 +112,14 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
         AppPermissionRoleEntity source = appPermissionRoleConverter
             .roleUpdateParamConvertToEntity(param);
         AppPermissionRoleEntity target = appPermissionRoleRepository
-            .findById(Long.valueOf(param.getId())).orElseThrow(AppRoleNotExistException::new);
+            .findByIdAndAppId(Long.valueOf(param.getId()), Long.valueOf(param.getAppId()))
+            .orElseThrow(AppRoleNotExistException::new);
         BeanUtils.merge(source, target, LAST_MODIFIED_TIME, LAST_MODIFIED_BY);
         appPermissionRoleRepository.save(target);
-        AuditContext.setTarget(Target.builder().id(target.getId().toString())
-            .type(TargetType.APP_PERMISSION_ROLE).build());
+        AuditContext.setTarget(
+            Target.builder().id(target.getId().toString()).type(TargetType.APP_PERMISSION_ROLE)
+                .build(),
+            Target.builder().id(target.getAppId().toString()).type(TargetType.APPLICATION).build());
         return true;
     }
 
@@ -120,24 +127,28 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
      * 删除角色
      *
      * @param ids {@link String}
+     * @param appId {@link Long}
      * @return {@link Boolean}
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deletePermissionRole(String ids) {
+    public boolean deletePermissionRole(String ids, Long appId) {
         List<String> idList = Arrays.stream(ids.split(",")).toList();
         List<Long> longIds = idList.stream().map(Long::parseLong).toList();
+        appPermissionRoleRepository.findByIdInAndAppId(longIds, appId)
+            .orElseThrow(AppRoleNotExistException::new);
         appPermissionRoleRepository.deleteAllById(longIds);
         // 删除对应策略
         appPermissionPolicyRepository.deleteAllBySubjectIdIn(idList);
         appPermissionPolicyRepository.deleteAllByObjectIdIn(longIds);
-        AuditContext
-            .setTarget(Target.builder().id(ids).type(TargetType.APP_PERMISSION_ROLE).build());
+        AuditContext.setTarget(
+            Target.builder().id(ids).type(TargetType.APP_PERMISSION_ROLE).build(),
+            Target.builder().id(appId.toString()).type(TargetType.APPLICATION).build());
         return true;
     }
 
     /**
-     * 角色详情
+     * 获取角色详情
      *
      * @param id {@link Long}
      * @return {@link AppPermissionRoleResult}
@@ -159,7 +170,6 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
      * @param appId {@link Long}
      * @return {@link Boolean}
      */
-    @SuppressWarnings("DuplicatedCode")
     @Override
     public Boolean permissionRoleParamCheck(CheckValidityType type, String value, Long appId,
                                             Long id) {
@@ -196,12 +206,15 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
      * 更新角色状态
      *
      * @param id     {@link String}
+     * @param appId     {@link String}
      * @param status {@link Boolean}
      * @return {@link Boolean}
      */
     @Override
-    public Boolean updatePermissionRoleStatus(String id, Boolean status) {
-        appPermissionRoleRepository.updateStatus(id, status);
+    public Boolean updatePermissionRoleStatus(String id, Long appId, Boolean status) {
+        appPermissionRoleRepository.updateStatus(id, appId, status);
+        AuditContext.setTarget(Target.builder().id(id).type(TargetType.APP_PERMISSION_ROLE).build(),
+            Target.builder().id(appId.toString()).type(TargetType.APPLICATION).build());
         return true;
     }
 

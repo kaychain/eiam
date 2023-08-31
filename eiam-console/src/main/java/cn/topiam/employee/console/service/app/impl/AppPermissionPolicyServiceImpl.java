@@ -21,6 +21,9 @@ import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import cn.topiam.employee.audit.context.AuditContext;
+import cn.topiam.employee.audit.entity.Target;
+import cn.topiam.employee.audit.enums.TargetType;
 import cn.topiam.employee.common.entity.app.AppPermissionPolicyEntity;
 import cn.topiam.employee.common.entity.app.po.AppPermissionPolicyPO;
 import cn.topiam.employee.common.entity.app.query.AppPolicyQuery;
@@ -73,6 +76,7 @@ public class AppPermissionPolicyServiceImpl implements AppPermissionPolicyServic
      */
     @Override
     public AppPermissionPolicyGetResult getPermissionPolicy(String id) {
+        // TODO
         return null;
     }
 
@@ -85,9 +89,13 @@ public class AppPermissionPolicyServiceImpl implements AppPermissionPolicyServic
     @Override
     public Boolean deletePermissionPolicy(String id) {
         Long policyId = Long.valueOf(id);
-        appPermissionPolicyRepository.findById(policyId)
-            .orElseThrow(AppPolicyNotExistException::new);
+        AppPermissionPolicyEntity appPermissionPolicyEntity = appPermissionPolicyRepository
+            .findById(policyId).orElseThrow(AppPolicyNotExistException::new);
         appPermissionPolicyRepository.deleteById(policyId);
+        AuditContext.setTarget(
+            Target.builder().id(policyId.toString()).type(TargetType.APP_PERMISSION_POLICY).build(),
+            Target.builder().id(appPermissionPolicyEntity.getAppId().toString())
+                .type(TargetType.APPLICATION).build());
         return true;
     }
 
@@ -104,6 +112,11 @@ public class AppPermissionPolicyServiceImpl implements AppPermissionPolicyServic
             .policyCreateParamConvertToEntity(param);
         // 新增策略
         appPermissionPolicyRepository.save(resource);
+        AuditContext.setTarget(
+            Target.builder().id(resource.getId().toString()).type(TargetType.APP_PERMISSION_POLICY)
+                .build(),
+            Target.builder().id(resource.getAppId().toString()).type(TargetType.APPLICATION)
+                .build());
         return true;
     }
 
@@ -119,6 +132,11 @@ public class AppPermissionPolicyServiceImpl implements AppPermissionPolicyServic
             .policyUpdateParamConvertToEntity(param);
         // 更新策略
         appPermissionPolicyRepository.save(resource);
+        AuditContext.setTarget(
+            Target.builder().id(resource.getId().toString()).type(TargetType.APP_PERMISSION_POLICY)
+                .build(),
+            Target.builder().id(resource.getAppId().toString()).type(TargetType.APPLICATION)
+                .build());
         return null;
     }
 

@@ -38,7 +38,7 @@ import static jakarta.persistence.FetchType.LAZY;
 
 /**
  * <p>
- * 应用资源关联
+ * 应用权限资源关联
  * </p>
  *
  * @author TopIAM

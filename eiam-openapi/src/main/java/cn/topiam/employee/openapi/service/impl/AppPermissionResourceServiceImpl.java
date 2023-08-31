@@ -206,10 +206,10 @@ public class AppPermissionResourceServiceImpl implements AppPermissionResourceSe
     }
 
     /**
-     * 批量处理actions
+     * 构建Action
      *
      * @param permissions {@link List<AppPermissionsActionParam>}
-     * @param resource {@link AppPermissionResourceEntity>}
+     * @param resource {@link AppPermissionResourceEntity}
      */
     private void buildActions(List<AppPermissionsActionParam> permissions,
                               AppPermissionResourceEntity resource) {

@@ -135,8 +135,7 @@ public class AppPermissionResourceServiceImpl implements AppPermissionResourceSe
      */
     @Override
     public Boolean updateStatus(Long id, boolean enabled) {
-        AppPermissionResourceEntity resource = appResourceRepository.findById(Long.valueOf(id))
-            .orElseThrow(AppResourceNotExistException::new);
+        appResourceRepository.findById(id).orElseThrow(AppResourceNotExistException::new);
         AuditContext.setTarget(
             Target.builder().id(id.toString()).type(TargetType.APP_PERMISSION_RESOURCE).build());
         return appPermissionPolicyRepository.updateStatus(id, enabled) > 0;
@@ -246,10 +245,10 @@ public class AppPermissionResourceServiceImpl implements AppPermissionResourceSe
     }
 
     /**
-     * 批量处理actions
+     * 构建Action
      *
      * @param permissions {@link List<AppPermissionsActionParam>}
-     * @param resource {@link AppPermissionResourceEntity>}
+     * @param resource {@link AppPermissionResourceEntity}
      */
     private void buildActions(List<AppPermissionsActionParam> permissions,
                               AppPermissionResourceEntity resource) {

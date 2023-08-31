@@ -17,11 +17,7 @@
  */
 package cn.topiam.employee.openapi.service;
 
-import cn.topiam.employee.common.enums.CheckValidityType;
 import cn.topiam.employee.openapi.pojo.request.app.query.AppResourceListQuery;
-import cn.topiam.employee.openapi.pojo.request.app.save.AppPermissionResourceCreateParam;
-import cn.topiam.employee.openapi.pojo.request.app.update.AppPermissionResourceUpdateParam;
-import cn.topiam.employee.openapi.pojo.response.app.AppPermissionResourceGetResult;
 import cn.topiam.employee.openapi.pojo.response.app.AppPermissionResourceListResult;
 import cn.topiam.employee.support.repository.page.domain.Page;
 import cn.topiam.employee.support.repository.page.domain.PageModel;
@@ -44,47 +40,4 @@ public interface AppPermissionResourceService {
      */
     Page<AppPermissionResourceListResult> getPermissionResourceList(PageModel page,
                                                                     AppResourceListQuery query);
-
-    /**
-     * 获取资源
-     *
-     * @param id {@link String}
-     * @return {@link AppPermissionResourceGetResult}
-     */
-    AppPermissionResourceGetResult getPermissionResource(String id);
-
-    /**
-     * 删除资源
-     *
-     * @param id {@link String}
-     * @return {@link Boolean}
-     */
-    Boolean deletePermissionResource(String id);
-
-    /**
-     * 创建资源
-     *
-     * @param param {@link AppPermissionResourceCreateParam}
-     * @return {@link Boolean}
-     */
-    Boolean createPermissionResource(AppPermissionResourceCreateParam param);
-
-    /**
-     * 更新资源
-     *
-     * @param param {@link AppPermissionResourceUpdateParam}
-     * @return {@link Boolean}
-     */
-    Boolean updatePermissionResource(AppPermissionResourceUpdateParam param);
-
-    /**
-     * 参数有效性验证
-     *
-     * @param type     {@link CheckValidityType}
-     * @param value    {@link String}
-     * @param appId {@link Long}
-     * @param id       {@link Long}
-     * @return {@link Boolean}
-     */
-    Boolean permissionResourceParamCheck(CheckValidityType type, String value, Long appId, Long id);
 }

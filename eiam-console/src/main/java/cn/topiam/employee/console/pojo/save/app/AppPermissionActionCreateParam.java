@@ -15,58 +15,63 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cn.topiam.employee.openapi.pojo.response.app;
+package cn.topiam.employee.console.pojo.save.app;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 import cn.topiam.employee.common.enums.PermissionActionType;
 
 import lombok.Data;
-import lombok.experimental.Accessors;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /**
- * 查询权限列表结果
+ * 权限创建参数
  *
  * @author TopIAM
- * Created by support@topiam.cn on 2020/8/11 23:08
+ * Created by support@topiam.cn on 2020/8/26 21:46
  */
 @Data
-@Accessors(chain = true)
-@Schema(description = "查询权限列表结果")
-public class AppPermissionActionListResult implements Serializable {
-
-    @Serial
-    private static final long    serialVersionUID = 3320953184046791392L;
-    /**
-     * ID
-     */
-    @Parameter(description = "ID")
-    private String               id;
+@Schema(description = "创建权限入参")
+public class AppPermissionActionCreateParam implements Serializable {
     /**
      * 权限名称
      */
-    @Parameter(description = "权限名称")
+    @Schema(description = "权限名称")
+    @NotBlank(message = "权限名称不能为空")
     private String               name;
 
     /**
      * 权限值
      */
-    @Parameter(description = "权限值")
+    @Schema(description = "权限值")
+    @NotBlank(message = "权限值不能为空")
     private String               value;
 
     /**
      * 权限类型
      */
-    @Parameter(description = "权限类型")
+    @Schema(description = "权限类型")
+    @NotNull(message = "权限类型不能为空")
     private PermissionActionType type;
+
+    /**
+     * 是否启用
+     */
+    private Boolean              enabled = true;
+
+    /**
+     * 所属资源
+     */
+    @Schema(description = "所属资源")
+    @NotBlank(message = "所属资源不能为空")
+    private Long                 resourceId;
 
     /**
      * 备注
      */
-    @Parameter(description = "备注")
+    @Schema(description = "备注")
     private String               remark;
 }

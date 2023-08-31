@@ -19,9 +19,6 @@ package cn.topiam.employee.openapi.service;
 
 import cn.topiam.employee.common.entity.app.po.AppPermissionPolicyPO;
 import cn.topiam.employee.openapi.pojo.request.app.query.OpenApiPolicyQuery;
-import cn.topiam.employee.openapi.pojo.request.app.save.AppPermissionPolicyCreateParam;
-import cn.topiam.employee.openapi.pojo.request.app.update.AppPermissionPolicyUpdateParam;
-import cn.topiam.employee.openapi.pojo.response.app.AppPermissionPolicyGetResult;
 import cn.topiam.employee.support.repository.page.domain.Page;
 import cn.topiam.employee.support.repository.page.domain.PageModel;
 
@@ -42,36 +39,4 @@ public interface AppPermissionPolicyService {
      * @return {@link AppPermissionPolicyPO}
      */
     Page<AppPermissionPolicyPO> getPermissionPolicyList(PageModel page, OpenApiPolicyQuery query);
-
-    /**
-     * 获取资源
-     *
-     * @param id {@link String}
-     * @return {@link AppPermissionPolicyGetResult}
-     */
-    AppPermissionPolicyGetResult getPermissionPolicy(String id);
-
-    /**
-     * 删除资源
-     *
-     * @param id {@link String}
-     * @return {@link Boolean}
-     */
-    Boolean deletePermissionPolicy(String id);
-
-    /**
-     * 创建资源
-     *
-     * @param param {@link AppPermissionPolicyCreateParam}
-     * @return {@link Boolean}
-     */
-    Boolean createPermissionPolicy(AppPermissionPolicyCreateParam param);
-
-    /**
-     * 更新资源
-     *
-     * @param param {@link AppPermissionPolicyUpdateParam}
-     * @return {@link Boolean}
-     */
-    Boolean updatePermissionPolicy(AppPermissionPolicyUpdateParam param);
 }

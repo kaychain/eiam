@@ -20,7 +20,10 @@ package cn.topiam.employee.console.service.app;
 import java.util.List;
 
 import cn.topiam.employee.console.pojo.query.app.AppPermissionActionListQuery;
+import cn.topiam.employee.console.pojo.result.app.AppPermissionActionGetResult;
 import cn.topiam.employee.console.pojo.result.app.AppPermissionActionListResult;
+import cn.topiam.employee.console.pojo.save.app.AppPermissionActionCreateParam;
+import cn.topiam.employee.console.pojo.update.app.AppPermissionActionUpdateParam;
 
 /**
  * <p>
@@ -40,4 +43,35 @@ public interface AppPermissionActionService {
      */
     List<AppPermissionActionListResult> getPermissionActionList(AppPermissionActionListQuery query);
 
+    /**
+     * 获取权限详情
+     *
+     * @param id {@link String}
+     * @return {@link AppPermissionActionGetResult}
+     */
+    AppPermissionActionGetResult getPermissionAction(String id);
+
+    /**
+     * 删除权限
+     *
+     * @param id {@link String}
+     * @return {@link Boolean}
+     */
+    Boolean deletePermissionAction(String id);
+
+    /**
+     * 创建权限
+     *
+     * @param param {@link AppPermissionActionCreateParam}
+     * @return {@link Boolean}
+     */
+    Boolean createPermissionAction(AppPermissionActionCreateParam param);
+
+    /**
+     * 更新权限
+     *
+     * @param param {@link AppPermissionActionUpdateParam}
+     * @return {@link Boolean}
+     */
+    Boolean updatePermissionAction(AppPermissionActionUpdateParam param);
 }

@@ -17,39 +17,21 @@
  */
 package cn.topiam.employee.openapi.service.impl;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.BooleanExpression;
 
 import cn.topiam.employee.common.entity.app.AppPermissionRoleEntity;
-import cn.topiam.employee.common.entity.app.QAppPermissionRoleEntity;
-import cn.topiam.employee.common.enums.CheckValidityType;
-import cn.topiam.employee.common.exception.app.AppRoleNotExistException;
-import cn.topiam.employee.common.repository.app.AppPermissionPolicyRepository;
 import cn.topiam.employee.common.repository.app.AppPermissionRoleRepository;
 import cn.topiam.employee.openapi.converter.app.AppPermissionRoleConverter;
 import cn.topiam.employee.openapi.pojo.request.app.query.AppPermissionRoleListQuery;
-import cn.topiam.employee.openapi.pojo.request.app.save.AppPermissionRoleCreateParam;
-import cn.topiam.employee.openapi.pojo.request.app.update.PermissionRoleUpdateParam;
 import cn.topiam.employee.openapi.pojo.response.app.AppPermissionRoleListResult;
-import cn.topiam.employee.openapi.pojo.response.app.AppPermissionRoleResult;
 import cn.topiam.employee.openapi.service.AppPermissionRoleService;
 import cn.topiam.employee.support.repository.page.domain.Page;
 import cn.topiam.employee.support.repository.page.domain.PageModel;
-import cn.topiam.employee.support.util.BeanUtils;
 
 import lombok.RequiredArgsConstructor;
-import static cn.topiam.employee.support.repository.domain.BaseEntity.LAST_MODIFIED_BY;
-import static cn.topiam.employee.support.repository.domain.BaseEntity.LAST_MODIFIED_TIME;
 
 /**
  * <p>
@@ -81,133 +63,11 @@ public class AppPermissionRoleServiceImpl implements AppPermissionRoleService {
     }
 
     /**
-     * 创建角色
-     *
-     * @param param {@link AppPermissionRoleCreateParam}
-     * @return {@link Boolean}
-     */
-    @Override
-    public boolean createPermissionRole(AppPermissionRoleCreateParam param) {
-        AppPermissionRoleEntity entity = appPermissionRoleConverter
-            .roleCreateParamConvertToEntity(param);
-        appPermissionRoleRepository.save(entity);
-        return true;
-    }
-
-    /**
-     * 更新角色
-     *
-     * @param param {@link PermissionRoleUpdateParam}
-     * @return {@link Boolean}
-     */
-    @Override
-    public boolean updatePermissionRole(PermissionRoleUpdateParam param) {
-        AppPermissionRoleEntity source = appPermissionRoleConverter
-            .roleUpdateParamConvertToEntity(param);
-        AppPermissionRoleEntity target = appPermissionRoleRepository
-            .findById(Long.valueOf(param.getId())).orElseThrow(AppRoleNotExistException::new);
-        BeanUtils.merge(source, target, LAST_MODIFIED_TIME, LAST_MODIFIED_BY);
-        appPermissionRoleRepository.save(target);
-        return true;
-    }
-
-    /**
-     * 删除角色
-     *
-     * @param ids {@link String}
-     * @return {@link Boolean}
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public boolean deletePermissionRole(String ids) {
-        List<String> idList = Arrays.stream(ids.split(",")).toList();
-        List<Long> longIds = idList.stream().map(Long::parseLong).toList();
-        appPermissionRoleRepository.deleteAllById(longIds);
-        // 删除对应策略
-        appPermissionPolicyRepository.deleteAllBySubjectIdIn(idList);
-        appPermissionPolicyRepository.deleteAllByObjectIdIn(longIds);
-        return true;
-    }
-
-    /**
-     * 获取角色详情
-     *
-     * @param id {@link Long}
-     * @return {@link AppPermissionRoleResult}
-     */
-    @Override
-    public AppPermissionRoleResult getPermissionRole(Long id) {
-        //查询
-        Optional<AppPermissionRoleEntity> entity = appPermissionRoleRepository.findById(id);
-        //映射
-        return appPermissionRoleConverter.entityConvertToRoleDetailResult(entity.orElse(null));
-    }
-
-    /**
-     * 参数有效性验证
-     *
-     * @param type     {@link CheckValidityType}
-     * @param value    {@link String}
-     * @param id       {@link Long}
-     * @param appId {@link Long}
-     * @return {@link Boolean}
-     */
-    @Override
-    public Boolean permissionRoleParamCheck(CheckValidityType type, String value, Long appId,
-                                            Long id) {
-        QAppPermissionRoleEntity role = QAppPermissionRoleEntity.appPermissionRoleEntity;
-        AppPermissionRoleEntity entity = new AppPermissionRoleEntity();
-        boolean result = false;
-        // ID存在说明是修改操作，查询一下当前数据
-        if (Objects.nonNull(id)) {
-            entity = appPermissionRoleRepository.findById(id)
-                .orElseThrow(AppRoleNotExistException::new);
-        }
-        //角色编码
-        if (CheckValidityType.CODE.equals(type)) {
-            if (StringUtils.equals(entity.getCode(), value)) {
-                return true;
-            }
-            BooleanExpression eq = role.code.eq(value);
-            eq.and(role.appId.eq(appId));
-            result = !appPermissionRoleRepository.exists(eq);
-        }
-        //角色名称
-        if (CheckValidityType.NAME.equals(type)) {
-            if (StringUtils.equals(entity.getName(), value)) {
-                return true;
-            }
-            BooleanExpression eq = role.name.eq(value);
-            eq.and(role.appId.eq(appId));
-            result = !appPermissionRoleRepository.exists(eq);
-        }
-        return result;
-    }
-
-    /**
-     * 更新角色状态
-     *
-     * @param id     {@link String}
-     * @param appId     {@link Long}
-     * @param status {@link Boolean}
-     * @return {@link Boolean}
-     */
-    @Override
-    public Boolean updatePermissionRoleStatus(String id, Long appId, Boolean status) {
-        appPermissionRoleRepository.updateStatus(id, appId, status);
-        return true;
-    }
-
-    /**
      * 用户数据映射器
      */
-    private final AppPermissionRoleConverter    appPermissionRoleConverter;
+    private final AppPermissionRoleConverter  appPermissionRoleConverter;
     /**
      * RoleRepository
      */
-    private final AppPermissionRoleRepository   appPermissionRoleRepository;
-    /**
-     * PolicyRepository
-     */
-    private final AppPermissionPolicyRepository appPermissionPolicyRepository;
+    private final AppPermissionRoleRepository appPermissionRoleRepository;
 }

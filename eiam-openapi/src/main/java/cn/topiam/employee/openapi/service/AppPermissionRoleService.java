@@ -17,12 +17,8 @@
  */
 package cn.topiam.employee.openapi.service;
 
-import cn.topiam.employee.common.enums.CheckValidityType;
 import cn.topiam.employee.openapi.pojo.request.app.query.AppPermissionRoleListQuery;
-import cn.topiam.employee.openapi.pojo.request.app.save.AppPermissionRoleCreateParam;
-import cn.topiam.employee.openapi.pojo.request.app.update.PermissionRoleUpdateParam;
 import cn.topiam.employee.openapi.pojo.response.app.AppPermissionRoleListResult;
-import cn.topiam.employee.openapi.pojo.response.app.AppPermissionRoleResult;
 import cn.topiam.employee.support.repository.page.domain.Page;
 import cn.topiam.employee.support.repository.page.domain.PageModel;
 
@@ -45,57 +41,4 @@ public interface AppPermissionRoleService {
      */
     Page<AppPermissionRoleListResult> getPermissionRoleList(PageModel page,
                                                             AppPermissionRoleListQuery query);
-
-    /**
-     * 创建角色
-     *
-     * @param param {@link AppPermissionRoleCreateParam}
-     * @return {@link Boolean}
-     */
-    boolean createPermissionRole(AppPermissionRoleCreateParam param);
-
-    /**
-     * 更新角色
-     *
-     * @param param {@link PermissionRoleUpdateParam}
-     * @return {@link Boolean}
-     */
-    boolean updatePermissionRole(PermissionRoleUpdateParam param);
-
-    /**
-     * 删除角色
-     *
-     * @param ids {@link String}
-     * @return {@link Boolean}
-     */
-    boolean deletePermissionRole(String ids);
-
-    /**
-     * 角色详情
-     *
-     * @param id {@link Long}
-     * @return {@link AppPermissionRoleResult}
-     */
-    AppPermissionRoleResult getPermissionRole(Long id);
-
-    /**
-     * 参数有效性验证
-     *
-     * @param type     {@link CheckValidityType}
-     * @param value    {@link String}
-     * @param appId {@link Long}
-     * @param id       {@link Long}
-     * @return {@link Boolean}
-     */
-    Boolean permissionRoleParamCheck(CheckValidityType type, String value, Long appId, Long id);
-
-    /**
-     * 更新角色状态
-     *
-     * @param id     {@link String}
-     * @param appId     {@link Long}
-     * @param status {@link Boolean}
-     * @return {@link Boolean}
-     */
-    Boolean updatePermissionRoleStatus(String id, Long appId, Boolean status);
 }

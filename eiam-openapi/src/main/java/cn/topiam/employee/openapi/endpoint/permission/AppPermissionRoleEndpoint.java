@@ -61,11 +61,6 @@ public class AppPermissionRoleEndpoint {
             .getPermissionRoleList(page, query);
         return ApiRestResult.<Page<AppPermissionRoleListResult>> builder().result(result).build();
     }
-    //2、新增角色
-
-    //3、编辑角色
-
-    //4、删除角色
 
     /**
      * 角色服务类

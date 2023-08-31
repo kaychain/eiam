@@ -61,11 +61,6 @@ public class AppPermissionResourceEndpoint {
         return ApiRestResult.<Page<AppPermissionResourceListResult>> builder().result(result)
             .build();
     }
-    //2、新增资源
-
-    //3、编辑资源
-
-    //4、删除资源
 
     /**
      * 资源服务类

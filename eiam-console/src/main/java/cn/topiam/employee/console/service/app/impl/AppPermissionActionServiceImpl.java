@@ -27,7 +27,10 @@ import cn.topiam.employee.common.entity.app.AppPermissionResourceEntity;
 import cn.topiam.employee.common.repository.app.AppPermissionResourceRepository;
 import cn.topiam.employee.console.converter.app.AppPermissionActionConverter;
 import cn.topiam.employee.console.pojo.query.app.AppPermissionActionListQuery;
+import cn.topiam.employee.console.pojo.result.app.AppPermissionActionGetResult;
 import cn.topiam.employee.console.pojo.result.app.AppPermissionActionListResult;
+import cn.topiam.employee.console.pojo.save.app.AppPermissionActionCreateParam;
+import cn.topiam.employee.console.pojo.update.app.AppPermissionActionUpdateParam;
 import cn.topiam.employee.console.service.app.AppPermissionActionService;
 
 import lombok.RequiredArgsConstructor;
@@ -57,6 +60,26 @@ public class AppPermissionActionServiceImpl implements AppPermissionActionServic
         List<AppPermissionResourceEntity> list = (List<AppPermissionResourceEntity>) appPermissionResourceRepository
             .findAll(predicate);
         return appPermissionActionConverter.entityConvertToResourceActionListResult(list);
+    }
+
+    @Override
+    public AppPermissionActionGetResult getPermissionAction(String id) {
+        return null;
+    }
+
+    @Override
+    public Boolean deletePermissionAction(String id) {
+        return null;
+    }
+
+    @Override
+    public Boolean createPermissionAction(AppPermissionActionCreateParam param) {
+        return null;
+    }
+
+    @Override
+    public Boolean updatePermissionAction(AppPermissionActionUpdateParam param) {
+        return null;
     }
 
     private final AppPermissionResourceRepository appPermissionResourceRepository;

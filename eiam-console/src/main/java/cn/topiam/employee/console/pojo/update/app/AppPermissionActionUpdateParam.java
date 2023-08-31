@@ -15,52 +15,70 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cn.topiam.employee.openapi.pojo.response.app;
+package cn.topiam.employee.console.pojo.update.app;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import cn.topiam.employee.common.enums.PermissionActionType;
 
 import lombok.Data;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import static io.swagger.v3.oas.annotations.media.Schema.AccessMode.READ_ONLY;
 
 /**
- * 权限详情
+ * 资源修改参数
  *
  * @author TopIAM
- * Created by support@topiam.cn on 2020/8/26 21:45
+ * Created by support@topiam.cn on 2020/8/26 21:46
  */
-@Schema(description = "权限操作")
 @Data
-public class AppPermissionActionGetResult implements Serializable {
+@Schema(description = "修改资源入参")
+public class AppPermissionActionUpdateParam implements Serializable {
+    @Serial
+    private static final long    serialVersionUID = 6021548372386059064L;
     /**
      * ID
      */
-    @Parameter(description = "ID")
+    @Schema(accessMode = READ_ONLY)
+    @NotBlank(message = "ID不能为空")
     private String               id;
+
     /**
      * 权限名称
      */
-    @Parameter(description = "权限名称")
+    @Schema(description = "权限名称")
     private String               name;
 
     /**
      * 权限值
      */
-    @Parameter(description = "权限值")
+    @Schema(description = "权限值")
     private String               value;
 
     /**
      * 权限类型
      */
-    @Parameter(description = "权限类型")
+    @Schema(description = "权限类型")
     private PermissionActionType type;
+
+    /**
+     * 是否启用
+     */
+    private Boolean              enabled          = true;
+
+    /**
+     * 所属资源
+     */
+    @Schema(description = "所属资源")
+    @NotBlank(message = "所属资源不能为空")
+    private Long                 resourceId;
 
     /**
      * 备注
      */
-    @Parameter(description = "备注")
+    @Schema(description = "备注")
     private String               remark;
 }

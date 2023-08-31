@@ -258,9 +258,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationResult getOrganizationById(String id) {
         OrganizationEntity entity = organizationRepository.findById(id)
             .orElseThrow(() -> new OpenApiException(OpenApiStatus.DEPARTMENT_NOT_EXIST));
-        OrganizationResult organizationResult = organizationConverter
-            .entityConvertToOrgDetailResult(entity);
-        return organizationResult;
+        return organizationConverter.entityConvertToOrgDetailResult(entity);
     }
 
     /**

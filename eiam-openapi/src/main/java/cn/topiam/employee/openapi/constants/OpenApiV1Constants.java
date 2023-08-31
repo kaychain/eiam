@@ -34,9 +34,14 @@ public class OpenApiV1Constants {
     public final static Integer ACCESS_TOKEN_EXPIRES_IN  = 7200;
 
     /**
-     * 组名称
+     * 用户组名称
      */
-    public static final String  OPEN_API_NAME            = "开放接口";
+    public static final String  ACCOUNT_API_NAME         = "账户管理";
+
+    /**
+     * 应用权限组名称
+     */
+    public static final String  PERMISSION_API_NAME      = "应用权限";
 
     /**
      * 访问凭证

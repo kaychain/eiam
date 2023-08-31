@@ -27,6 +27,9 @@ import cn.topiam.employee.audit.controller.AuditController;
 import cn.topiam.employee.common.exception.handler.GlobalExceptionHandler;
 import cn.topiam.employee.common.storage.controller.StorageFileResource;
 import cn.topiam.employee.core.configuration.EiamApiConfiguration;
+import cn.topiam.employee.core.endpoint.CountryEndpoint;
+import cn.topiam.employee.core.endpoint.security.PublicSecretEndpoint;
+import cn.topiam.employee.support.security.password.PasswordGenerateEndpoint;
 
 /**
  * 应用程序启动入口
@@ -36,10 +39,13 @@ import cn.topiam.employee.core.configuration.EiamApiConfiguration;
  */
 @ServletComponentScan
 @SpringBootApplication(scanBasePackages = { "cn.topiam.employee" })
-@ComponentScan(excludeFilters = { @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = { EiamApiConfiguration.class,
-                                                                                                     StorageFileResource.class,
-                                                                                                     AuditController.class,
-                                                                                                     GlobalExceptionHandler.class }) })
+@ComponentScan(excludeFilters = { @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { EiamApiConfiguration.class,
+                                                                                                       StorageFileResource.class,
+                                                                                                       AuditController.class,
+                                                                                                       GlobalExceptionHandler.class,
+                                                                                                       PublicSecretEndpoint.class,
+                                                                                                       PasswordGenerateEndpoint.class,
+                                                                                                       CountryEndpoint.class }) })
 public class EiamOpenApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(EiamOpenApiApplication.class, args);

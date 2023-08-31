@@ -32,6 +32,7 @@ import cn.topiam.employee.support.result.ApiRestResult;
 import lombok.RequiredArgsConstructor;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import static cn.topiam.employee.openapi.constants.OpenApiV1Constants.OPEN_API_PERMISSION_PATH;
 
 /**
@@ -40,6 +41,7 @@ import static cn.topiam.employee.openapi.constants.OpenApiV1Constants.OPEN_API_P
  * @author TopIAM
  * Created by support@topiam.cn on  2022/9/5 21:04
  */
+@Tag(name = "应用权限-授权策略")
 @RestController
 @RequestMapping(value = OPEN_API_PERMISSION_PATH + "/policy")
 @RequiredArgsConstructor

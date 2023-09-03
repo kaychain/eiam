@@ -44,8 +44,8 @@ import lombok.RequiredArgsConstructor;
 public class AppPermissionPolicyRepositoryCustomizedImpl implements
                                                          AppPermissionPolicyRepositoryCustomized {
 
-    private String leftJoin(String table, String condition) {
-        return " LEFT JOIN " + table + " ON " + condition + " AND " + table + ".is_deleted = '0' ";
+    private String leftJoin(String table, String alias, String condition) {
+        return " LEFT JOIN " + table + " AS " + alias + " ON " + condition + " AND " + alias + ".is_deleted = '0' ";
     }
 
     @Override
@@ -71,40 +71,40 @@ public class AppPermissionPolicyRepositoryCustomizedImpl implements
             where.append("policy.effect = '").append(query.getEffect().getCode()).append("' ");
         }
 
-        List<String> fields = Lists.newArrayList("policy.subject_id", "policy.object_id", "policy.subject_type", "policy.object_type", "policy.id", "policy.effect");
+        List<String> fields = Lists.newArrayList("policy.subject_id", "policy.object_id", "policy.subject_type", "policy.object_type", "policy.id_", "policy.effect_");
         String subjectJoin;
         String objectJoin = null;
         switch (query.getSubjectType()) {
             case USER -> {
-                subjectJoin = leftJoin("app_account account", "policy.subject_id = account.id");
+                subjectJoin = leftJoin("app_account", "account", "policy.subject_id = account.id_");
                 fields.add("account.account as subject_name");
             }
             case USER_GROUP -> {
-                subjectJoin = leftJoin("user_group group", "policy.subject_id = group.id");
-                fields.add("group.name as subject_name");
+                subjectJoin = leftJoin("user_group", "group", "policy.subject_id = group.id_");
+                fields.add("group.name_ as subject_name");
             }
             case ORGANIZATION -> {
-                subjectJoin = leftJoin("organization org", "policy.subject_id = org.id");
-                fields.add("org.name as subject_name");
+                subjectJoin = leftJoin("organization", "org", "policy.subject_id = org.id_");
+                fields.add("org.name_ as subject_name");
             }
             case ROLE -> {
-                subjectJoin = leftJoin("app_permission_role role", "policy.subject_id = role.id");
-                fields.add("role.name as subject_name");
+                subjectJoin = leftJoin("app_permission_role", "role", "policy.subject_id = role.id_");
+                fields.add("role.name_ as subject_name");
             }
             default -> throw new RuntimeException("暂不支持");
         }
         switch (query.getObjectType()) {
             case PERMISSION -> {
-                objectJoin = leftJoin("app_permission_action action", "policy.subject_id = action.id");
-                fields.add("action.name as object_name");
+                objectJoin = leftJoin("app_permission_action", "action", "policy.subject_id = action.id_");
+                fields.add("action.name_ as object_name");
             }
             case ROLE -> {
-                objectJoin = leftJoin("app_permission_role role2", "policy.subject_id = role2.id");
-                fields.add("role2.name as object_name");
+                objectJoin = leftJoin("app_permission_role", "role2", "policy.subject_id = role2.id_");
+                fields.add("role2.name_ as object_name");
             }
             case RESOURCE -> {
-                objectJoin = leftJoin("app_permission_resource resource", "policy.subject_id = resource.id");
-                fields.add("resource.name as object_name");
+                objectJoin = leftJoin("app_permission_resource", "resource", "policy.subject_id = resource.id_");
+                fields.add("resource.name_ as object_name");
             }
         }
         StringBuilder selectSql = new StringBuilder("SELECT ").append(String.join(", ", fields))

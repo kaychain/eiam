@@ -40,6 +40,17 @@ import static cn.topiam.employee.openapi.constants.OpenApiV1Constants.*;
 public class OpenApiConfiguration {
 
     /**
+     * 应用权限管理 RestAPI
+     *
+     * @return {@link GroupedOpenApi}
+     */
+    @Bean
+    public GroupedOpenApi allRestApi() {
+        return GroupedOpenApi.builder().group("访问凭证")
+                .pathsToMatch(AUTH_PATH + "/**").build();
+    }
+
+    /**
      * 账户管理 RestAPI
      *
      * @return {@link GroupedOpenApi}

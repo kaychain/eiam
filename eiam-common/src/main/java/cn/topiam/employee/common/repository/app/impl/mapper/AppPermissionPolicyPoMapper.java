@@ -49,7 +49,7 @@ public class AppPermissionPolicyPoMapper implements RowMapper<AppPermissionPolic
     public AppPermissionPolicyPO mapRow(ResultSet rs, int rowNum) throws SQLException {
         AppPermissionPolicyPO appPermissionPolicyPo = new AppPermissionPolicyPO();
         appPermissionPolicyPo.setId(rs.getLong("id_"));
-        appPermissionPolicyPo.setEffect(AppPolicyEffect.getType(rs.getString("effect")));
+        appPermissionPolicyPo.setEffect(AppPolicyEffect.getType(rs.getString("effect_")));
         appPermissionPolicyPo.setSubjectId(rs.getString("subject_id"));
         appPermissionPolicyPo
             .setSubjectType(AppPolicySubjectType.getType(rs.getString("subject_type")));

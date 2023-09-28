@@ -47,8 +47,10 @@ import cn.topiam.employee.openapi.constants.OpenApiStatus;
 import cn.topiam.employee.openapi.converter.account.OrganizationConverter;
 import cn.topiam.employee.openapi.exception.OpenApiException;
 import cn.topiam.employee.openapi.pojo.result.account.OrganizationChildResult;
+import cn.topiam.employee.openapi.pojo.result.account.OrganizationMember;
 import cn.topiam.employee.openapi.pojo.result.account.OrganizationResult;
 import cn.topiam.employee.openapi.pojo.save.account.OrganizationCreateParam;
+import cn.topiam.employee.openapi.pojo.save.account.OrganizationMemberCreateParam;
 import cn.topiam.employee.openapi.pojo.update.account.OrganizationUpdateParam;
 import cn.topiam.employee.openapi.service.account.OrganizationService;
 import cn.topiam.employee.support.repository.domain.IdEntity;
@@ -307,6 +309,24 @@ public class OrganizationServiceImpl implements OrganizationService {
             .findByExternalId(externalId);
         return organization.map(IdEntity::getId)
             .orElseThrow(() -> new OpenApiException(OpenApiStatus.DEPARTMENT_NOT_EXIST));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<OrganizationMember> batchSaveOrganizationMember(OrganizationMemberCreateParam organizationMemberCreateParam) {
+        Long userId = organizationMemberCreateParam.getUserId();
+        organizationMemberRepository.deleteByUserId(userId);
+        List<OrganizationMemberEntity> resultList = organizationConverter
+            .orgMemberConvertToEntity(organizationMemberCreateParam);
+        organizationMemberRepository.batchSave(resultList);
+        userMessagePublisher.sendUserChangeMessage(UserMessageTag.SAVE, String.valueOf(userId));
+        return organizationConverter.entityConvertToOrgMember(resultList);
+    }
+
+    @Override
+    public List<OrganizationMember> getOrganizationMember(Long userId) {
+        List<OrganizationMemberEntity> list = organizationMemberRepository.findAllByUserId(userId);
+        return organizationConverter.entityConvertToOrgMember(list);
     }
 
     private final JPAQueryFactory              jpaQueryFactory;

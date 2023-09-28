@@ -20,8 +20,10 @@ package cn.topiam.employee.openapi.service.account;
 import java.util.List;
 
 import cn.topiam.employee.openapi.pojo.result.account.OrganizationChildResult;
+import cn.topiam.employee.openapi.pojo.result.account.OrganizationMember;
 import cn.topiam.employee.openapi.pojo.result.account.OrganizationResult;
 import cn.topiam.employee.openapi.pojo.save.account.OrganizationCreateParam;
+import cn.topiam.employee.openapi.pojo.save.account.OrganizationMemberCreateParam;
 import cn.topiam.employee.openapi.pojo.update.account.OrganizationUpdateParam;
 
 /**
@@ -88,4 +90,20 @@ public interface OrganizationService {
      * @return {@link String}
      */
     String getOrganizationIdByExternalId(String externalId);
+
+    /**
+     * 批量操作组织用户关联关系
+     *
+     * @param organizationMemberCreateParam {@link OrganizationMemberCreateParam}
+     * @return {@link List}
+     */
+    List<OrganizationMember> batchSaveOrganizationMember(OrganizationMemberCreateParam organizationMemberCreateParam);
+
+    /**
+     * 根据用户id查询组织
+     *
+     * @param userId {@link Long}
+     * @return {@link List}
+     */
+    List<OrganizationMember> getOrganizationMember(Long userId);
 }

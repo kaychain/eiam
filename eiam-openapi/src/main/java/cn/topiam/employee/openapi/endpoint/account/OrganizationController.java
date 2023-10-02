@@ -20,7 +20,6 @@ package cn.topiam.employee.openapi.endpoint.account;
 import java.util.List;
 
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,22 +27,18 @@ import cn.topiam.employee.audit.annotation.Audit;
 import cn.topiam.employee.audit.event.type.EventType;
 import cn.topiam.employee.openapi.common.OpenApiResponse;
 import cn.topiam.employee.openapi.pojo.result.account.OrganizationChildResult;
-import cn.topiam.employee.openapi.pojo.result.account.OrganizationMember;
 import cn.topiam.employee.openapi.pojo.result.account.OrganizationResult;
 import cn.topiam.employee.openapi.pojo.save.account.OrganizationCreateParam;
-import cn.topiam.employee.openapi.pojo.save.account.OrganizationMemberCreateParam;
 import cn.topiam.employee.openapi.pojo.update.account.OrganizationUpdateParam;
 import cn.topiam.employee.openapi.service.account.OrganizationService;
 import cn.topiam.employee.support.lock.Lock;
 import cn.topiam.employee.support.preview.Preview;
-import cn.topiam.employee.support.result.ApiRestResult;
 
 import lombok.RequiredArgsConstructor;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotNull;
-import static cn.topiam.employee.openapi.constants.OpenApiV1Constants.ORGANIZATION_PATH;
+import static cn.topiam.employee.openapi.constant.OpenApiV1Constants.ORGANIZATION_PATH;
 
 /**
  * 系统账户-组织架构
@@ -172,38 +167,6 @@ public class OrganizationController {
     public OpenApiResponse<String> getOrganizationIdByExternalId(@PathVariable(value = "externalId") String externalId) {
         return OpenApiResponse
             .success(organizationService.getOrganizationIdByExternalId(externalId));
-    }
-
-    /**
-     * 批量操作组织用户关联关系
-     *
-     * @param organizationMemberCreateParam {@link OrganizationMemberCreateParam}
-     * @return {@link List<OrganizationMember>}
-     */
-    @Validated
-    @Audit(type = EventType.CREATE_ORGANIZATION_MEMBER)
-    @Operation(summary = "批量操作组织用户关联关系")
-    @PostMapping(value = "/batch_org_member")
-    @PreAuthorize(value = "authenticated and @sae.hasAuthority(T(cn.topiam.employee.support.security.userdetails.UserType).ADMIN)")
-    public ApiRestResult<List<OrganizationMember>> batchSaveOrganizationMember(@RequestBody @Validated OrganizationMemberCreateParam organizationMemberCreateParam) {
-        List<OrganizationMember> result = organizationService
-            .batchSaveOrganizationMember(organizationMemberCreateParam);
-        return ApiRestResult.<List<OrganizationMember>> builder().result(result).build();
-    }
-
-    /**
-     * 批量获取组织信息
-     *
-     * @param userId {@link Long}
-     * @return {@link List}
-     */
-    @Validated
-    @Operation(summary = "批量获取组织信息")
-    @GetMapping(value = "/org_member")
-    @PreAuthorize(value = "authenticated and @sae.hasAuthority(T(cn.topiam.employee.support.security.userdetails.UserType).ADMIN)")
-    public ApiRestResult<List<OrganizationMember>> getOrganizationMember(@RequestParam(value = "userId", required = false) @NotNull(message = "用户id不能为空") Long userId) {
-        List<OrganizationMember> result = organizationService.getOrganizationMember(userId);
-        return ApiRestResult.<List<OrganizationMember>> builder().result(result).build();
     }
 
     /**

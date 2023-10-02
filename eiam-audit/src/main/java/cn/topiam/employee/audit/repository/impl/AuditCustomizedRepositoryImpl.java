@@ -1,5 +1,5 @@
 /*
- * eiam-console - Employee Identity and Access Management
+ * eiam-common - Employee Identity and Access Management
  * Copyright © 2022-Present Jinan Yuanchuang Network Technology Co., Ltd. (support@topiam.cn)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,41 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package cn.topiam.employee.console.pojo.result.analysis;
+package cn.topiam.employee.audit.repository.impl;
 
-import java.io.Serializable;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-import io.swagger.v3.oas.annotations.media.Schema;
+import cn.topiam.employee.audit.repository.AuditCustomizedRepository;
 
 /**
- * 认证量统计结果
  *
  * @author TopIAM
- * Created by support@topiam.cn on 2020/11/22 23:16
+ * Created by support@topiam.cn on  2022/10/2 02:54
  */
-@Data
-@AllArgsConstructor
-@Schema(description = "认证量统计响应")
-public class AuthnQuantityResult implements Serializable {
+@Repository
+public class AuditCustomizedRepositoryImpl implements AuditCustomizedRepository {
 
-    /**
-     * 名称
-     */
-    @Schema(description = "名称")
-    private String name;
+    private final JdbcTemplate jdbcTemplate;
 
-    /**
-     * 数量
-     */
-    @Schema(description = "数量")
-    private Long   count;
-
-    /**
-     * 状态
-     */
-    @Schema(description = "状态")
-    private String status;
+    public AuditCustomizedRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 }

@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 import cn.topiam.employee.audit.entity.AuditElasticSearchEntity;
 import cn.topiam.employee.audit.event.type.EventType;
 import cn.topiam.employee.audit.repository.AuditRepository;
-import cn.topiam.employee.audit.repository.result.AuditRankResult;
+import cn.topiam.employee.audit.repository.result.AuditStatisticsResult;
 import cn.topiam.employee.audit.repository.result.AuthnQuantityResult;
 import cn.topiam.employee.audit.repository.result.AuthnZoneResult;
 import cn.topiam.employee.common.entity.app.AppEntity;
@@ -45,7 +45,6 @@ import cn.topiam.employee.support.autoconfiguration.SupportProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import co.elastic.clients.elasticsearch._types.aggregations.*;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
@@ -78,8 +77,8 @@ public class AnalysisServiceImpl implements AnalysisService {
         result.setUserCount(userRepository.count());
         result.setIdpCount(identityProviderRepository.count());
         // 查询今日认证量条件
-        result.setTodayAuthnCount(
-            auditRepository.countByTypeAndTime(EventType.LOGIN_PORTAL, LocalDate.now()));
+        result.setTodayAuthnCount(auditRepository.countByTypeAndTime(
+            EventType.LOGIN_PORTAL.getCode(), LocalDateTime.MIN, LocalDateTime.MAX));
         return result;
     }
 
@@ -107,11 +106,11 @@ public class AnalysisServiceImpl implements AnalysisService {
     @Override
     public List<AppVisitRankResult> appVisitRank(AnalysisQuery params) {
         List<AppVisitRankResult> applicationVisitList = new ArrayList<>();
-        List<AuditRankResult> auditRankResults = auditRepository.appVisitRank(EventType.APP_SSO,
-            params.getStartTime(), params.getEndTime());
-        for (AuditRankResult auditRankResult : auditRankResults) {
+        List<AuditStatisticsResult> auditRankResults = auditRepository
+            .appVisitRank(EventType.APP_SSO, params.getStartTime(), params.getEndTime());
+        for (AuditStatisticsResult auditRankResult : auditRankResults) {
             // 单点登录
-            String name = getAppName(auditRankResult.getId());
+            String name = getAppName(auditRankResult.getKey());
             applicationVisitList.add(new AppVisitRankResult(name, auditRankResult.getCount()));
         }
         return applicationVisitList;
@@ -141,11 +140,11 @@ public class AnalysisServiceImpl implements AnalysisService {
     @Override
     public List<AuthnHotProviderResult> authnHotProvider(AnalysisQuery params) {
         List<AuthnHotProviderResult> authTypeList = new ArrayList<>();
-        List<AuditRankResult> auditRankResults = auditRepository
+        List<AuditStatisticsResult> auditRankResults = auditRepository
             .authnHotProvider(EventType.LOGIN_PORTAL, params.getStartTime(), params.getEndTime());
-        for (AuditRankResult auditRankResult : auditRankResults) {
+        for (AuditStatisticsResult auditRankResult : auditRankResults) {
             // 授权类型
-            String name = getIdentityProviderType(auditRankResult.getId()).name();
+            String name = getIdentityProviderType(auditRankResult.getKey()).name();
             authTypeList.add(new AuthnHotProviderResult(name, auditRankResult.getCount()));
         }
         return authTypeList;
@@ -159,8 +158,12 @@ public class AnalysisServiceImpl implements AnalysisService {
      */
     @Override
     public List<AuthnZoneResult> authnZone(AnalysisQuery params) {
-        return auditRepository.authnZone(EventType.LOGIN_PORTAL, params.getStartTime(),
-            params.getEndTime());
+        List<AuditStatisticsResult> auditStatisticsResults = auditRepository
+            .authnZone(EventType.LOGIN_PORTAL, params.getStartTime(), params.getEndTime());
+        return auditStatisticsResults.stream()
+            .map(auditStatisticsResult -> new AuthnZoneResult(auditStatisticsResult.getKey(),
+                auditStatisticsResult.getCount()))
+            .toList();
     }
 
     /**

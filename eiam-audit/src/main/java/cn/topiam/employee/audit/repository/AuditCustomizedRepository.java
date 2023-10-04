@@ -17,6 +17,13 @@
  */
 package cn.topiam.employee.audit.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import cn.topiam.employee.audit.event.type.EventType;
+import cn.topiam.employee.audit.repository.result.AuditStatisticsResult;
+import cn.topiam.employee.audit.repository.result.AuthnQuantityResult;
+
 /**
  * 组织成员
  *
@@ -25,4 +32,15 @@ package cn.topiam.employee.audit.repository;
  */
 public interface AuditCustomizedRepository {
 
+    List<AuditStatisticsResult> authnHotProvider(EventType type, LocalDateTime startTime,
+                                                 LocalDateTime endTime);
+
+    List<AuthnQuantityResult> authnQuantity(EventType type, LocalDateTime startTime,
+                                            LocalDateTime endTime, String dateFormat);
+
+    List<AuditStatisticsResult> appVisitRank(EventType type, LocalDateTime startTime,
+                                             LocalDateTime endTime);
+
+    List<AuditStatisticsResult> authnZone(EventType type, LocalDateTime startTime,
+                                          LocalDateTime endTime);
 }

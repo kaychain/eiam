@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -28,22 +29,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * 审计统计
  *
  * @author TopIAM
- * Created by support@topiam.cn on 2020/11/22 23:16
+ * Created by support@topiam.cn on 2023/10/04 23:16
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "审计统计")
-public class AuditRankResult implements Serializable {
+public class AuditStatisticsResult implements Serializable {
 
     /**
-     * 应用id
+     * key
      */
-    @Schema(description = "应用id")
-    private String id;
+    private String key;
 
     /**
-     * 访问次数
+     * count
      */
-    @Schema(description = "访问次数")
     private Long   count;
 }

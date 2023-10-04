@@ -17,6 +17,8 @@
  */
 package cn.topiam.employee.audit.repository.result;
 
+import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,7 +35,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "登录区域响应")
-public class AuthnZoneResult {
+public class AuthnZoneResult implements Serializable {
 
     /**
      * 省份code

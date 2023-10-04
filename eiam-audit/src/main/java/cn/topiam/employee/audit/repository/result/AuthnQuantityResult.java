@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -31,6 +32,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Created by support@topiam.cn on 2020/11/22 23:16
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "认证量统计响应")
 public class AuthnQuantityResult implements Serializable {

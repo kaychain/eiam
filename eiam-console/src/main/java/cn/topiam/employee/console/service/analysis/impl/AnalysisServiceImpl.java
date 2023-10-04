@@ -144,8 +144,10 @@ public class AnalysisServiceImpl implements AnalysisService {
             .authnHotProvider(EventType.LOGIN_PORTAL, params.getStartTime(), params.getEndTime());
         for (AuditStatisticsResult auditRankResult : auditRankResults) {
             // 授权类型
-            String name = getIdentityProviderType(auditRankResult.getKey()).name();
-            authTypeList.add(new AuthnHotProviderResult(name, auditRankResult.getCount()));
+            if (Objects.nonNull(auditRankResult.getKey())) {
+                String name = getIdentityProviderType(auditRankResult.getKey()).name();
+                authTypeList.add(new AuthnHotProviderResult(name, auditRankResult.getCount()));
+            }
         }
         return authTypeList;
     }

@@ -20,6 +20,7 @@ package cn.topiam.employee.audit.repository.impl.mapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.lang.NonNull;
 
@@ -46,7 +47,9 @@ public class AuditStatisticsResultMapper implements RowMapper<AuditStatisticsRes
     public AuditStatisticsResult mapRow(@NonNull ResultSet rs, int rowNum) throws SQLException {
         //@formatter:off
         AuditStatisticsResult user = new AuditStatisticsResult();
-        user.setKey(rs.getString("key_"));
+        if (StringUtils.isNoneBlank(rs.getString("key_"))) {
+            user.setKey(rs.getString("key_").replace("\"", ""));
+        }
         user.setCount(rs.getLong("count_"));
         //@formatter:on
         return user;

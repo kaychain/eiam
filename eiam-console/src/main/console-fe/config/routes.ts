@@ -40,6 +40,19 @@ export default [
     hideInMenu: true,
     component: './user/SessionExpired',
   },
+  {
+    name: 'reset-password',
+    path: '/user/reset-password',
+    layout: false,
+    hideInMenu: true,
+    component: './user/ResetPassword',
+  },
+  {
+    name: 'account.profile',
+    path: '/user/profile',
+    hideInMenu: true,
+    component: './user/Profile',
+  },
   /*欢迎页*/
   {
     name: 'welcome',
@@ -48,23 +61,12 @@ export default [
     icon: 'SmileOutlined',
     hideInMenu: true,
   },
-  //仪表盘
+  //总览
   {
     name: 'dashboard',
     path: '/dashboard',
-    icon: 'DashboardOutlined',
-    routes: [
-      {
-        path: '/dashboard',
-        redirect: '/dashboard/analysis',
-      },
-      /*分析页*/
-      {
-        name: 'analysis',
-        path: '/dashboard/analysis',
-        component: './dashboard/Analysis',
-      },
-    ],
+    icon: 'HomeOutlined',
+    component: './dashboard',
   }, //账户
   {
     name: 'account',
@@ -139,28 +141,37 @@ export default [
     name: 'app',
     icon: 'AppstoreOutlined',
     path: '/app',
-    component: './app/AppList',
-  },
-  //创建应用
-  {
-    name: 'app.create',
-    path: '/app/create',
-    hideInMenu: true,
-    component: './app/AppCreate',
-  },
-  //应用详情
-  {
-    name: 'app.detail',
-    path: '/app/detail',
-    hideInMenu: true,
-    component: './app/AppDetail',
-  },
-  //应用分组
-  {
-    name: 'app.group',
-    path: '/app/group',
-    hideInMenu: true,
-    component: './app/AppGroup',
+    routes: [
+      {
+        path: '/app',
+        redirect: '/app/list',
+      },
+      //创建应用
+      {
+        name: 'create',
+        path: '/app/create',
+        component: './app/AppCreate',
+      },
+      //应用列表
+      {
+        name: 'list',
+        path: '/app/list',
+        component: './app/AppList',
+      },
+      //应用详情
+      {
+        name: 'detail',
+        path: '/app/list/detail',
+        hideInMenu: true,
+        component: './app/AppDetail',
+      },
+      //应用分组
+      {
+        name: 'group',
+        path: '/app/group',
+        component: './app/AppGroup',
+      },
+    ],
   },
   //行为审计
   {
@@ -230,11 +241,11 @@ export default [
         path: '/monitor',
         redirect: '/monitor/session',
       },
-      //系统监控
+      //会话管理
       {
         name: 'session',
         path: '/monitor/session',
-        component: './monitor/SessionList',
+        component: './monitor/Session',
       },
     ],
   },

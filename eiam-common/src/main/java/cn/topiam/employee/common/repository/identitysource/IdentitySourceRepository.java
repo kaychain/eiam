@@ -20,12 +20,14 @@ package cn.topiam.employee.common.repository.identitysource;
 import java.util.List;
 import java.util.Optional;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
@@ -33,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import cn.topiam.employee.common.constant.AccountConstants;
 import cn.topiam.employee.common.entity.identitysource.IdentitySourceEntity;
-import cn.topiam.employee.support.repository.LogicDeleteRepository;
 
 /**
  * <p>
@@ -43,31 +44,22 @@ import cn.topiam.employee.support.repository.LogicDeleteRepository;
  * </p>
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2020-08-16
+ * Created by support@topiam.cn on 2020-08-16
  */
 @Repository
 @CacheConfig(cacheNames = { AccountConstants.IDS_CACHE_NAME })
-public interface IdentitySourceRepository extends LogicDeleteRepository<IdentitySourceEntity, Long>,
-                                          QuerydslPredicateExecutor<IdentitySourceEntity> {
+public interface IdentitySourceRepository extends JpaRepository<IdentitySourceEntity, String>,
+                                          JpaSpecificationExecutor<IdentitySourceEntity> {
     /**
      * 根据ID查询
      *
      * @param id {@link Long}
      * @return {@link IdentitySourceEntity}
      */
+    @NotNull
     @Override
     @Cacheable(key = "#p0", unless = "#result==null")
-    Optional<IdentitySourceEntity> findById(@Param(value = "id") Long id);
-
-    /**
-     * 根据ID查询
-     *
-     * @param id {@link Long}
-     * @return {@link IdentitySourceEntity}
-     */
-    @Cacheable(key = "#p0", unless = "#result==null")
-    @Query(value = "SELECT * FROM identity_source WHERE id_ = :id", nativeQuery = true)
-    Optional<IdentitySourceEntity> findByIdContainsDeleted(@Param(value = "id") Long id);
+    Optional<IdentitySourceEntity> findById(@NotNull @Param(value = "id") String id);
 
     /**
      * 查询启用的身份源
@@ -88,7 +80,7 @@ public interface IdentitySourceRepository extends LogicDeleteRepository<Identity
     @Modifying
     @CacheEvict(allEntries = true)
     @Query(value = "UPDATE IdentitySourceEntity SET enabled=:enabled where id=:id")
-    Integer updateIdentitySourceStatus(@Param(value = "id") Long id,
+    Integer updateIdentitySourceStatus(@Param(value = "id") String id,
                                        @Param(value = "enabled") Boolean enabled);
 
     /**
@@ -112,7 +104,7 @@ public interface IdentitySourceRepository extends LogicDeleteRepository<Identity
      */
     @Override
     @CacheEvict(allEntries = true)
-    void deleteById(@NonNull Long id);
+    void deleteById(@NonNull String id);
 
     /**
      * 更新身份源策略
@@ -123,8 +115,8 @@ public interface IdentitySourceRepository extends LogicDeleteRepository<Identity
     @Transactional(rollbackFor = Exception.class)
     @Modifying
     @CacheEvict(allEntries = true)
-    @Query(value = "UPDATE identity_source SET strategy_config = :strategyConfig where id_ = :id", nativeQuery = true)
-    void updateStrategyConfig(@Param(value = "id") Long id,
+    @Query(value = "UPDATE IdentitySourceEntity SET strategyConfig = :strategyConfig where id = :id")
+    void updateStrategyConfig(@Param(value = "id") String id,
                               @Param(value = "strategyConfig") String strategyConfig);
 
     /**

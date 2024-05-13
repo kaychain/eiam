@@ -33,7 +33,7 @@ import {
   ModalForm,
   ProCard,
   ProForm,
-  ProFormSelect,
+  ProFormSegmented,
   ProFormSwitch,
   ProFormText,
 } from '@ant-design/pro-components';
@@ -45,7 +45,7 @@ import QiNiu from './QiNiu';
 import Tencent from './Tencent';
 import { Container } from '@/components/Container';
 import { useIntl } from '@umijs/max';
-import { SmsTemplateList } from '@/pages/setting/Message/data';
+import { SmsTemplateList } from '../../data.d';
 
 const layout = {
   labelCol: {
@@ -84,7 +84,7 @@ const TestModal = (props: {
       modalProps={{ onCancel: onCancel, destroyOnClose: true }}
       labelAlign={'left'}
       labelCol={{ span: 4 }}
-      wrapperCol={{ span: 19 }}
+      wrapperCol={{ span: 20 }}
       key={data.type}
       title={intl.formatMessage({ id: 'pages.setting.message.sms_provider.send_scene.modal.from' })}
       initialValues={{ type: data.type, name: data.name, content: data.content }}
@@ -181,7 +181,7 @@ export default (props: { visible: boolean }) => {
       align: 'center',
       width: 90,
       editable: false,
-      render: (text: any, row: Record<string, string>) => {
+      render: (_text: any, row: Record<string, string>) => {
         return [
           <a
             key={row.type}
@@ -327,8 +327,8 @@ export default (props: { visible: boolean }) => {
               editorFormRef.current?.resetFields();
             }}
             submitter={{
-              render: (p, dom) => {
-                return <FooterToolbar>{dom}</FooterToolbar>;
+              render: (_p, dom) => {
+                return <FooterToolbar>{dom.map((item) => item)}</FooterToolbar>;
               },
               submitButtonProps: {
                 style: {
@@ -345,13 +345,13 @@ export default (props: { visible: boolean }) => {
               },
             }}
             onFinish={async (values) => {
-              const fieldsValue: any = editorFormRef.current?.getFieldsValue();
+              const fieldsValue = editorFormRef.current?.getFieldsValue();
               const templates: { type: string; code: string }[] = [];
-              editableKeys?.forEach((i) => {
-                if (fieldsValue[i].code !== undefined) {
+              editableKeys?.forEach((i, index) => {
+                if (fieldsValue?.[index]?.code !== undefined) {
                   const config: { type: string; code: string } = {
                     type: `${i}`,
-                    code: fieldsValue[i].code,
+                    code: fieldsValue[index].code,
                   };
                   templates.push(config);
                 }
@@ -376,14 +376,14 @@ export default (props: { visible: boolean }) => {
               }
             }}
           >
-            <ProFormSelect
+            <ProFormSegmented
               name="provider"
               label={intl.formatMessage({ id: 'pages.setting.message.sms_provider.provider' })}
               rules={[{ required: true }]}
               fieldProps={{
-                onChange: async (value: string) => {
+                onChange: async (value) => {
                   setLoading(true);
-                  setProvider(value);
+                  setProvider(value as string);
                   //清理
                   form.resetFields();
                   form.setFieldsValue({ provider: value });
@@ -394,7 +394,7 @@ export default (props: { visible: boolean }) => {
                     form.setFieldsValue({ ...result.config });
                     setLanguage(result.language);
                     //获取模板
-                    await fetchSmsTemplateList(result.language, value);
+                    await fetchSmsTemplateList(result.language, value as string);
                     result.templates?.forEach((i: { type: any; code: any }) => {
                       editorFormRef.current?.setFieldsValue({ [i.type]: { code: i.code } });
                     });
@@ -402,31 +402,33 @@ export default (props: { visible: boolean }) => {
                   //已配置和选中配置不一致，走初始化流程
                   if (success && result && result.provider !== value) {
                     setLanguage(Language.ZH);
-                    await fetchSmsTemplateList(Language.ZH, value);
+                    await fetchSmsTemplateList(Language.ZH, value as string);
                   }
                   setLoading(false);
                 },
               }}
-              options={[
-                {
-                  value: SMS_PROVIDER.ALIYUN,
-                  label: intl.formatMessage({
-                    id: 'pages.setting.message.sms_provider.provider.aliyun',
-                  }),
-                },
-                {
-                  value: SMS_PROVIDER.TENCENT,
-                  label: intl.formatMessage({
-                    id: 'pages.setting.message.sms_provider.provider.tencent',
-                  }),
-                },
-                {
-                  value: SMS_PROVIDER.QI_NIU,
-                  label: intl.formatMessage({
-                    id: 'pages.setting.message.sms_provider.provider.qi_niu',
-                  }),
-                },
-              ]}
+              request={async () => {
+                return [
+                  {
+                    value: SMS_PROVIDER.ALIYUN,
+                    label: intl.formatMessage({
+                      id: 'pages.setting.message.sms_provider.provider.aliyun',
+                    }),
+                  },
+                  {
+                    value: SMS_PROVIDER.TENCENT,
+                    label: intl.formatMessage({
+                      id: 'pages.setting.message.sms_provider.provider.tencent',
+                    }),
+                  },
+                  {
+                    value: SMS_PROVIDER.QI_NIU,
+                    label: intl.formatMessage({
+                      id: 'pages.setting.message.sms_provider.provider.qi_niu',
+                    }),
+                  },
+                ];
+              }}
             />
             {provider === SMS_PROVIDER.ALIYUN && <AliCloud />}
             {provider === SMS_PROVIDER.TENCENT && <Tencent />}

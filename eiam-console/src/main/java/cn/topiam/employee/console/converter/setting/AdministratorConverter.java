@@ -23,15 +23,11 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 
-import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Predicate;
-
-import cn.topiam.employee.common.constant.CommonConstants;
 import cn.topiam.employee.common.entity.account.query.UserListQuery;
 import cn.topiam.employee.common.entity.setting.AdministratorEntity;
-import cn.topiam.employee.common.entity.setting.QAdministratorEntity;
 import cn.topiam.employee.console.pojo.query.setting.AdministratorListQuery;
 import cn.topiam.employee.console.pojo.result.setting.AdministratorListResult;
 import cn.topiam.employee.console.pojo.result.setting.AdministratorResult;
@@ -39,10 +35,13 @@ import cn.topiam.employee.console.pojo.save.setting.AdministratorCreateParam;
 import cn.topiam.employee.console.pojo.update.setting.AdministratorUpdateParam;
 import cn.topiam.employee.support.repository.page.domain.Page;
 import cn.topiam.employee.support.util.BeanUtils;
-import static cn.topiam.employee.common.util.ImageAvatarUtils.bufferedImageToBase64;
-import static cn.topiam.employee.common.util.ImageAvatarUtils.generateAvatarImg;
-import static cn.topiam.employee.support.repository.domain.BaseEntity.LAST_MODIFIED_BY;
-import static cn.topiam.employee.support.repository.domain.BaseEntity.LAST_MODIFIED_TIME;
+import cn.topiam.employee.support.util.ImageAvatarUtils;
+
+import jakarta.persistence.criteria.Predicate;
+import static cn.topiam.employee.common.entity.setting.AdministratorEntity.*;
+import static cn.topiam.employee.support.repository.base.BaseEntity.LAST_MODIFIED_BY;
+import static cn.topiam.employee.support.repository.base.BaseEntity.LAST_MODIFIED_TIME;
+import static cn.topiam.employee.support.util.ImageAvatarUtils.generateAvatarImg;
 import static cn.topiam.employee.support.util.PhoneNumberUtils.getPhoneAreaCode;
 import static cn.topiam.employee.support.util.PhoneNumberUtils.getPhoneNumber;
 
@@ -70,7 +69,8 @@ public interface AdministratorConverter {
                     user);
                 //头像
                 if (StringUtils.isEmpty(user.getAvatar())) {
-                    convert.setAvatar(bufferedImageToBase64(generateAvatarImg(user.getUsername())));
+                    convert.setAvatar(ImageAvatarUtils
+                        .bufferedImageToBase64(generateAvatarImg(user.getUsername())));
                 } else {
                     convert.setAvatar(user.getAvatar());
                 }
@@ -100,7 +100,7 @@ public interface AdministratorConverter {
      * @param page {@link AdministratorEntity}
      * @return {@link AdministratorListResult}
      */
-    @Mapping(target = "initialized", expression = "java(page.getUsername().equals(cn.topiam.employee.common.constant.SecurityConstants.DEFAULT_ADMIN_USERNAME))")
+    @Mapping(target = "initialized", expression = "java(page.getUsername().equals(cn.topiam.employee.support.constant.EiamConstants.DEFAULT_ADMIN_USERNAME))")
     @Mapping(target = "status", source = "status.code")
     @Mapping(target = "emailVerified", source = "emailVerified", defaultValue = "false")
     @Mapping(target = "authTotal", source = "authTotal", defaultValue = "0L")
@@ -133,13 +133,11 @@ public interface AdministratorConverter {
             entity.setPhoneVerified(Boolean.TRUE);
             entity.setPhoneAreaCode(getPhoneAreaCode(param.getPhone()));
         }
-        entity.setAvatar(
-            StringUtils.defaultString(param.getAvatar(), CommonConstants.getRandomAvatar()));
-        entity.setStatus(cn.topiam.employee.common.enums.UserStatus.ENABLE);
+        entity.setStatus(cn.topiam.employee.common.enums.UserStatus.ENABLED);
         entity.setAuthTotal(0L);
         entity.setLastUpdatePasswordTime(java.time.LocalDateTime.now());
         //密码处理
-        entity.setPassword(cn.topiam.employee.support.context.ApplicationContextHelp
+        entity.setPassword(cn.topiam.employee.support.context.ApplicationContextService
             .getBean(org.springframework.security.crypto.password.PasswordEncoder.class)
             .encode(param.getPassword()));
         return entity;
@@ -160,7 +158,7 @@ public interface AdministratorConverter {
 
         AdministratorEntity entity = new AdministratorEntity();
         if (param.getId() != null) {
-            entity.setId(Long.parseLong(param.getId()));
+            entity.setId(param.getId());
         }
         entity.setRemark(param.getRemark());
         //邮箱
@@ -195,25 +193,34 @@ public interface AdministratorConverter {
      * @return {@link AdministratorResult} 管理员详情
      */
     @Mapping(target = "status", source = "status.code")
-    @Mapping(target = "initialized", expression = "java(user.getUsername().equals(cn.topiam.employee.common.constant.SecurityConstants.DEFAULT_ADMIN_USERNAME))")
+    @Mapping(target = "initialized", expression = "java(user.getUsername().equals(cn.topiam.employee.support.constant.EiamConstants.DEFAULT_ADMIN_USERNAME))")
     AdministratorResult entityConvertToAdministratorDetailsResult(AdministratorEntity user);
 
     /**
-     * 查询管理员列表参数转换为  Querydsl  Predicate
+     * 查询管理员列表参数转换为 Specification
      *
-     * @param query {@link UserListQuery} query
-     * @return {@link Predicate}
+     * @param listQuery {@link UserListQuery} listQuery
+     * @return {@link Specification}
      */
-    default Predicate queryAdministratorListParamConvertToPredicate(AdministratorListQuery query) {
-        QAdministratorEntity user = QAdministratorEntity.administratorEntity;
-        Predicate predicate = ExpressionUtils.and(user.isNotNull(), user.deleted.eq(Boolean.FALSE));
-        //查询条件
-        //@formatter:off
-        predicate = StringUtils.isBlank(query.getUsername()) ? predicate : ExpressionUtils.and(predicate, user.username.eq(query.getUsername()));
-        predicate = StringUtils.isBlank(query.getPhone()) ? predicate : ExpressionUtils.and(predicate, user.phone.like("%" + query.getPhone() + "%"));
-        predicate = StringUtils.isBlank(query.getEmail()) ? predicate : ExpressionUtils.and(predicate, user.email.like("%" + query.getEmail() + "%"));
-        //@formatter:on
-        return predicate;
+    default Specification<AdministratorEntity> queryAdministratorListParamConvertToSpecification(AdministratorListQuery listQuery) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.isNotBlank(listQuery.getUsername())) {
+                predicates.add(criteriaBuilder.equal(root.get(USERNAME_FIELD_NAME),
+                    "%" + listQuery.getUsername() + "%"));
+            }
+            if (StringUtils.isNotBlank(listQuery.getPhone())) {
+                predicates.add(
+                    criteriaBuilder.equal(root.get(PHONE_FIELD_NAME), listQuery.getUsername()));
+            }
+            if (StringUtils.isNotBlank(listQuery.getEmail())) {
+                predicates.add(
+                    criteriaBuilder.equal(root.get(EMAIL_FIELD_NAME), listQuery.getUsername()));
+            }
+            query.where(predicates.toArray(new Predicate[0]));
+            query.orderBy(criteriaBuilder.desc(root.get(LAST_MODIFIED_TIME)));
+            return query.getRestriction();
+        };
     }
 
 }

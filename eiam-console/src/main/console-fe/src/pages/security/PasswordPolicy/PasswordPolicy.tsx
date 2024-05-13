@@ -38,7 +38,7 @@ import { Container } from '@/components/Container';
 
 const layout = {
   labelCol: { span: 4 },
-  wrapperCol: { span: 19 },
+  wrapperCol: { span: 20 },
 };
 
 export default () => {
@@ -80,8 +80,8 @@ export default () => {
               }
             }}
             submitter={{
-              render: (p, dom) => {
-                return <FooterToolbar>{dom}</FooterToolbar>;
+              render: (_p, dom) => {
+                return <FooterToolbar>{dom.map((item) => item)}</FooterToolbar>;
               },
               resetButtonProps: {
                 style: {
@@ -108,7 +108,7 @@ export default () => {
                       name={['passwordLeastLength']}
                       rules={[{ required: true }]}
                     >
-                      <InputNumber min={8} max={10} />
+                      <InputNumber min={6} max={30} />
                     </Form.Item>
                   </Col>
                   <Col xs={10} sm={10} md={8} lg={8} xl={6}>

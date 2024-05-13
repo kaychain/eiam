@@ -42,13 +42,13 @@ export async function getChildOrganization(
 }
 
 /**
- * Get Filter Organization Tree
+ * Get Search Organization Tree
  */
-export async function getFilterOrganizationTree(
+export async function getSearchOrganizationTree(
   keyWord: string,
-): Promise<API.ApiResult<AccountAPI.FilterOrganizationTree[]>> {
-  return request<API.ApiResult<AccountAPI.FilterOrganizationTree[]>>(
-    `/api/v1/organization/filter_tree`,
+): Promise<API.ApiResult<AccountAPI.SearchOrganizationTree[]>> {
+  return request<API.ApiResult<AccountAPI.SearchOrganizationTree[]>>(
+    `/api/v1/organization/search/tree`,
     {
       params: { keyWord: keyWord },
     },
@@ -58,21 +58,8 @@ export async function getFilterOrganizationTree(
 /**
  * Get organization Details
  */
-export async function getOrganization(
-  id: string | number,
-): Promise<API.ApiResult<AccountAPI.GetOrganization>> {
+export async function getOrganization(id: Key): Promise<API.ApiResult<AccountAPI.GetOrganization>> {
   return request<API.ApiResult<AccountAPI.GetOrganization>>(`/api/v1/organization/get/${id}`);
-}
-
-/**
- * Batch Get organization Details
- */
-export async function batchGetOrganization(
-  ids: string[],
-): Promise<API.ApiResult<AccountAPI.BatchGetOrganization>> {
-  return request<API.ApiResult<AccountAPI.BatchGetOrganization>>(`/api/v1/organization/batch_get`, {
-    params: { ids: ids.join(',') },
-  });
 }
 
 /**
@@ -128,8 +115,8 @@ export async function moveOrganization(
  */
 export async function getUserList(
   params: Record<string, any>,
-  sort: Record<string, SortOrder>,
-  filter: Record<string, (string | number)[] | null>,
+  sort?: Record<string, SortOrder>,
+  filter?: Record<string, (string | number)[] | null>,
 ): Promise<RequestData<AccountAPI.ListUser>> {
   return request<API.ApiResult<AccountAPI.ListUser>>('/api/v1/user/list', {
     params: { ...params, ...sortParamConverter(sort), ...filterParamConverter(filter) },
@@ -215,19 +202,6 @@ export async function unbindIdp(id: string | number): Promise<API.ApiResult<bool
 }
 
 /**
- * User Transfer
- */
-export async function userTransfer(
-  userId: string,
-  orgId: string | number,
-): Promise<API.ApiResult<boolean>> {
-  return request<API.ApiResult<boolean>>(`/api/v1/user/transfer`, {
-    method: 'PUT',
-    params: { userId: userId, orgId: orgId },
-  });
-}
-
-/**
  * User Reset Password
  */
 export async function userResetPassword(
@@ -286,15 +260,6 @@ export async function removeBatchUser(
 }
 
 /**
- * 用户离职
- */
-export async function userResign(id: string): Promise<API.ApiResult<boolean>> {
-  return request<API.ApiResult<boolean>>(`/api/v1/user/resign/${id}`, {
-    method: 'DELETE',
-  });
-}
-
-/**
  * 验证用户信息
  *
  * @param type
@@ -326,6 +291,15 @@ export async function enableUser(id: string): Promise<API.ApiResult<boolean>> {
  */
 export async function disableUser(id: string): Promise<API.ApiResult<boolean>> {
   return request(`/api/v1/user/disable/${id}`, {
+    method: 'PUT',
+  });
+}
+
+/**
+ * UnLock User
+ */
+export async function unlockUser(id: string): Promise<API.ApiResult<boolean>> {
+  return request(`/api/v1/user/unlock/${id}`, {
     method: 'PUT',
   });
 }
@@ -419,7 +393,7 @@ export async function removeUserGroup(id: string): Promise<API.ApiResult<boolean
  */
 export async function removeUserGroupMember(
   id: string,
-  userIds: (number | string)[],
+  userIds: (number | string | Key)[],
 ): Promise<API.ApiResult<boolean>> {
   return request<API.ApiResult<boolean>>(`/api/v1/user_group/remove_member/${id}`, {
     method: 'DELETE',
@@ -478,4 +452,11 @@ export async function addMemberToUserGroup(
  */
 export async function passwordGenerate(): Promise<API.ApiResult<boolean>> {
   return request(`/api/v1/password/generate`, { method: 'GET' });
+}
+
+/**
+ * 删除身份源
+ */
+export async function deleteIdentitySource(id: string): Promise<API.ApiResult<boolean>> {
+  return request(`/api/v1/identity_source/delete/${id}`, { method: 'DELETE' });
 }

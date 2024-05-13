@@ -17,16 +17,15 @@
  */
 import { ProFormSwitch } from '@ant-design/pro-components';
 import { IdentityProviderType } from '../../constant';
-import DingTalkOauthConfig from './DingTalkOauthConfig';
-import DingTalkScanCode from './DingTalkScanCodeConfig';
-import FeiShuScanCodeConfig from './FeiShuScanCodeConfig';
-import QqOauthConfig from './QqOauthConfig';
-import WeChatScanCode from './WeChatScanCodeConfig';
-import WeWorkScanCode from './WeWorkScanCodeConfig';
-import GithubOauthConfig from './GithubOauthConfig';
-import GiteeOauthConfig from './GiteeOauthConfig';
+import DingTalkOAuthConfig from './DingTalkOAuthConfig';
+import FeiShuOAuthConfig from './FeiShuOAuthConfig';
+import QqOAuthConfig from './QqOAuthConfig';
+import WeChatOAuthConfig from './WeChatOAuthConfig';
+import WeChatWorkOAuthConfig from './WeChatWorkOAuthConfig';
+import GithubOAuthConfig from './GithubOAuthConfig';
+import GiteeOAuthConfig from './GiteeOAuthConfig';
+import AliPayOAuthConfig from './AliPayOAuthConfig';
 import { useIntl } from '@umijs/max';
-import AliPayOauthConfig from '@/pages/authn/IdentityProvider/components/Config/AliPayOauthConfig';
 
 /**
  * Config
@@ -40,15 +39,16 @@ const Config = (props: { type: IdentityProviderType | string; isCreate?: boolean
 
   return (
     <>
-      {type === IdentityProviderType.wechat_qr && <WeChatScanCode isCreate={isCreate} />}
-      {type === IdentityProviderType.wechatwork_qr && <WeWorkScanCode isCreate={isCreate} />}
-      {type === IdentityProviderType.dingtalk_qr && <DingTalkScanCode isCreate={isCreate} />}
-      {type === IdentityProviderType.dingtalk_oauth && <DingTalkOauthConfig isCreate={isCreate} />}
-      {type === IdentityProviderType.qq_oauth && <QqOauthConfig isCreate={isCreate} />}
-      {type === IdentityProviderType.feishu_oauth && <FeiShuScanCodeConfig isCreate={isCreate} />}
-      {type === IdentityProviderType.gitee_oauth && <GiteeOauthConfig isCreate={isCreate} />}
-      {type === IdentityProviderType.github_oauth && <GithubOauthConfig isCreate={isCreate} />}
-      {type === IdentityProviderType.alipay_oauth && <AliPayOauthConfig isCreate={isCreate} />}
+      {type === IdentityProviderType.wechat_qr && <WeChatOAuthConfig isCreate={isCreate} />}
+      {type === IdentityProviderType.wechatwork_oauth && (
+        <WeChatWorkOAuthConfig isCreate={isCreate} />
+      )}
+      {type === IdentityProviderType.dingtalk_oauth && <DingTalkOAuthConfig isCreate={isCreate} />}
+      {type === IdentityProviderType.qq_oauth && <QqOAuthConfig isCreate={isCreate} />}
+      {type === IdentityProviderType.feishu_oauth && <FeiShuOAuthConfig isCreate={isCreate} />}
+      {type === IdentityProviderType.gitee_oauth && <GiteeOAuthConfig isCreate={isCreate} />}
+      {type === IdentityProviderType.github_oauth && <GithubOAuthConfig isCreate={isCreate} />}
+      {type === IdentityProviderType.alipay_oauth && <AliPayOAuthConfig isCreate={isCreate} />}
       <ProFormSwitch
         name={['displayed']}
         extra={intl.formatMessage({

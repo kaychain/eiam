@@ -26,10 +26,10 @@ import cn.topiam.employee.common.storage.impl.*;
 import cn.topiam.employee.support.web.converter.EnumConvert;
 
 /**
- * 短信平台
+ * 存储提供商
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2020/8/19
+ * Created by support@topiam.cn on 2020/8/19
  */
 public enum StorageProvider implements Serializable {
 

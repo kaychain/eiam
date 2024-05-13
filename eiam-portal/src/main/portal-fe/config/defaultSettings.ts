@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ProLayoutProps } from '@ant-design/pro-components';
+import {ProLayoutProps} from '@ant-design/pro-components';
 
 const Settings: ProLayoutProps & {
   logo?: string;
@@ -32,7 +32,7 @@ const Settings: ProLayoutProps & {
   title: '统一身份认证平台',
   logo: '/full-logo.svg',
   iconfontUrl: '',
-  siderWidth: 190,
+  siderWidth: 215,
 };
 
 export default Settings;

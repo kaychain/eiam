@@ -209,7 +209,7 @@ const CreateUser = (props: CreateUserProps) => {
                 }),
               },
               {
-                validator: async (rule, value) => {
+                validator: async (_rule, value) => {
                   if (!value) {
                     return Promise.resolve();
                   }
@@ -283,6 +283,9 @@ const CreateUser = (props: CreateUserProps) => {
                 }),
               },
             ]}
+            addonWarpStyle={{
+              flexWrap: 'nowrap',
+            }}
             addonAfter={
               <Button
                 key={'autoGeneration'}
@@ -363,14 +366,27 @@ const CreateUser = (props: CreateUserProps) => {
                     id: 'pages.account.user_list.user.form.phone.placeholder',
                   })}
                   fieldProps={{ autoComplete: 'off' }}
+                  validateFirst={true}
                   rules={[
                     {
-                      validator: async (rule, value) => {
+                      pattern: new RegExp('^[0-9]*$'),
+                      message: intl.formatMessage({
+                        id: 'pages.account.user_list.user.form.phone.rule.0.message',
+                      }),
+                    },
+                    {
+                      validator: async (_rule, value) => {
                         if (!value) {
                           return Promise.resolve();
                         }
+                        setSubmitLoading(true);
                         //校验手机号格式
-                        const isValidNumber = await phoneIsValidNumber(value, phoneAreaCode);
+                        const isValidNumber = await phoneIsValidNumber(
+                          value,
+                          phoneAreaCode,
+                        ).finally(() => {
+                          setSubmitLoading(false);
+                        });
                         if (!isValidNumber) {
                           return Promise.reject<Error>(
                             new Error(
@@ -380,10 +396,13 @@ const CreateUser = (props: CreateUserProps) => {
                             ),
                           );
                         }
+                        setSubmitLoading(true);
                         const { success, result } = await userParamCheck(
                           ParamCheckType.PHONE,
                           `${phoneAreaCode}${value}`,
-                        );
+                        ).finally(() => {
+                          setSubmitLoading(false);
+                        });
                         if (!success) {
                           return Promise.reject<Error>();
                         }
@@ -404,6 +423,9 @@ const CreateUser = (props: CreateUserProps) => {
                       validator: validatePhoneOrEmail,
                     },
                   ]}
+                  addonWarpStyle={{
+                    flexWrap: 'nowrap',
+                  }}
                   addonBefore={
                     <FormPhoneAreaCodeSelect
                       name={'phoneAreaCode'}
@@ -426,6 +448,7 @@ const CreateUser = (props: CreateUserProps) => {
             placeholder={intl.formatMessage({
               id: 'pages.account.user_list.user.form.email.placeholder',
             })}
+            validateFirst={true}
             rules={[
               {
                 type: 'email',
@@ -434,13 +457,19 @@ const CreateUser = (props: CreateUserProps) => {
                 }),
               },
               {
-                validator: async (rule, value) => {
+                validator: async (_rule, value) => {
                   if (!value) {
                     return Promise.resolve();
                   }
-                  const { success, result } = await userParamCheck(ParamCheckType.EMAIL, value);
+                  setSubmitLoading(true);
+                  const { success, result } = await userParamCheck(
+                    ParamCheckType.EMAIL,
+                    value,
+                  ).finally(() => {
+                    setSubmitLoading(false);
+                  });
                   if (success && !result) {
-                    return Promise.reject<any>(
+                    return Promise.reject<Error>(
                       new Error(
                         intl.formatMessage({
                           id: 'pages.account.user_list.user.form.email.rule.2.message',

@@ -17,6 +17,8 @@
  */
 package cn.topiam.employee.authentication.otp.sms.filter;
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,14 +48,14 @@ import cn.topiam.employee.support.util.HttpResponseUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import static cn.topiam.employee.common.constant.AuthorizeConstants.OTP_LOGIN;
+import static cn.topiam.employee.authentication.otp.sms.constant.SmsOtpAuthenticationConstants.OTP_LOGIN;
 import static cn.topiam.employee.support.exception.enums.ExceptionStatus.EX000102;
 
 /**
  * AbstractOTPAuthenticationFilter
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2020/12/16 21:34
+ * Created by support@topiam.cn on 2020/12/16 21:34
  */
 public class SmsOtpAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -88,11 +90,11 @@ public class SmsOtpAuthenticationFilter extends AbstractAuthenticationProcessing
                     "Authentication method not supported: " + request.getMethod());
             }
             // 获取手机号/邮箱
-            String recipient = StringUtils.defaultString(obtainUsername(request), "").trim();
+            String recipient = Objects.toString(obtainUsername(request), "").trim();
             if (StringUtils.isBlank(recipient)) {
                 throw new PhoneNotExistException();
             }
-            String code = StringUtils.defaultString(obtainCode(request), "").trim();
+            String code = Objects.toString(obtainCode(request), "").trim();
             if (StringUtils.isBlank(code)) {
                 throw new CaptchaNotExistException();
             }

@@ -20,13 +20,14 @@ package cn.topiam.employee.common.entity.app;
 import java.io.Serializable;
 import java.util.List;
 
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.SoftDelete;
+import org.hibernate.type.SqlTypes;
 
 import cn.topiam.employee.common.enums.app.FormEncryptType;
 import cn.topiam.employee.common.enums.app.FormSubmitType;
-import cn.topiam.employee.support.repository.domain.LogicDeleteEntity;
+import cn.topiam.employee.support.repository.SoftDeleteConverter;
+import cn.topiam.employee.support.repository.base.BaseEntity;
 
 import lombok.Data;
 import lombok.Getter;
@@ -34,35 +35,32 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
-import io.hypersistence.utils.hibernate.type.json.JsonType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import static cn.topiam.employee.support.repository.domain.LogicDeleteEntity.SOFT_DELETE_SET;
-import static cn.topiam.employee.support.repository.domain.LogicDeleteEntity.SOFT_DELETE_WHERE;
+import static cn.topiam.employee.support.repository.base.BaseEntity.IS_DELETED_COLUMN;
 
 /**
  * APP Form 配置
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2022/12/13 22:31
+ * Created by support@topiam.cn on 2022/12/13 22:31
  */
 @Getter
 @Setter
 @ToString
 @Entity
 @Accessors(chain = true)
-@Table(name = "app_form_config")
-@SQLDelete(sql = "update app_form_config set " + SOFT_DELETE_SET + " where id_ = ?")
-@Where(clause = SOFT_DELETE_WHERE)
-public class AppFormConfigEntity extends LogicDeleteEntity<Long> {
+@Table(name = "eiam_app_form_config")
+@SoftDelete(columnName = IS_DELETED_COLUMN, converter = SoftDeleteConverter.class)
+public class AppFormConfigEntity extends BaseEntity {
 
     /**
      * APP ID
      */
     @Column(name = "app_id")
-    private Long             appId;
+    private String           appId;
 
     /**
      * 登录URL
@@ -116,7 +114,7 @@ public class AppFormConfigEntity extends LogicDeleteEntity<Long> {
      * 登录其他信息
      */
     @Column(name = "other_field")
-    @Type(JsonType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     private List<OtherField> otherField;
 
     @Data

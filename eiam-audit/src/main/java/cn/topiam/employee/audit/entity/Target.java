@@ -20,21 +20,15 @@ package cn.topiam.employee.audit.entity;
 import java.io.Serial;
 import java.io.Serializable;
 
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
-
 import cn.topiam.employee.audit.enums.TargetType;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * Target
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2022/11/5 23:34
+ * Created by support@topiam.cn on 2022/11/5 23:34
  */
 @Data
 @Builder
@@ -50,24 +44,27 @@ public class Target implements Serializable {
     /**
      * 目标 ID
      */
-    @Field(type = FieldType.Keyword, name = "id")
+    @NonNull
     private String             id;
 
     /**
      * 目标名称
      */
-    @Field(type = FieldType.Keyword, name = "name")
+    @NonNull
     private String             name;
     /**
      *
      * 目标类型
      */
-    @Field(type = FieldType.Keyword, name = "type")
+    @NonNull
     private TargetType         type;
 
     /**
      * 目标类型名称
      */
-    @Field(type = FieldType.Keyword, name = "type_name")
     private String             typeName;
+
+    public String getTypeName() {
+        return type.getDesc();
+    }
 }

@@ -31,11 +31,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.MimeTypeUtils;
 
+import cn.topiam.employee.common.enums.ViewContentType;
 import cn.topiam.employee.common.jackjson.encrypt.JsonPropertyEncrypt;
 import cn.topiam.employee.common.storage.AbstractStorage;
 import cn.topiam.employee.common.storage.StorageConfig;
 import cn.topiam.employee.common.storage.StorageProviderException;
-import cn.topiam.employee.common.util.ViewContentType;
+import cn.topiam.employee.common.storage.UploadException;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -45,13 +46,12 @@ import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
 import jakarta.validation.constraints.NotEmpty;
-import static cn.topiam.employee.common.constant.StorageConstants.URL_REGEXP;
 
 /**
  * minio
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2021/11/10 21:32
+ * Created by support@topiam.cn on 2021/11/10 21:32
  */
 @Slf4j
 public class MinIoStorage extends AbstractStorage {
@@ -100,8 +100,8 @@ public class MinIoStorage extends AbstractStorage {
                    + SEPARATOR
                    + URLEncoder.encode(key, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
         } catch (Exception e) {
-            log.error("minio upload exception: {}", e.getMessage(), e);
-            throw new StorageProviderException("minio upload exception", e);
+            log.error("Minio upload exception: {}", e.getMessage(), e);
+            throw new UploadException(e);
         }
     }
 

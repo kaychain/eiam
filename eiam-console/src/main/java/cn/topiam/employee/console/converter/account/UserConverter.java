@@ -19,25 +19,20 @@ package cn.topiam.employee.console.converter.account;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
-import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
-import org.springframework.data.elasticsearch.client.elc.Queries;
-import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.Lists;
-
-import cn.topiam.employee.audit.entity.AuditElasticSearchEntity;
-import cn.topiam.employee.audit.entity.Event;
-import cn.topiam.employee.audit.event.type.EventType;
+import cn.topiam.employee.audit.entity.AuditEntity;
+import cn.topiam.employee.audit.entity.GeoLocation;
+import cn.topiam.employee.audit.entity.UserAgent;
 import cn.topiam.employee.audit.event.type.PortalEventType;
-import cn.topiam.employee.common.constant.CommonConstants;
 import cn.topiam.employee.common.entity.account.UserDetailEntity;
 import cn.topiam.employee.common.entity.account.UserEntity;
 import cn.topiam.employee.common.entity.account.po.UserPO;
@@ -49,25 +44,19 @@ import cn.topiam.employee.console.pojo.result.account.UserLoginAuditListResult;
 import cn.topiam.employee.console.pojo.result.account.UserResult;
 import cn.topiam.employee.console.pojo.save.account.UserCreateParam;
 import cn.topiam.employee.console.pojo.update.account.UserUpdateParam;
-import cn.topiam.employee.support.context.ApplicationContextHelp;
+import cn.topiam.employee.support.context.ApplicationContextService;
 import cn.topiam.employee.support.repository.page.domain.Page;
 import cn.topiam.employee.support.repository.page.domain.PageModel;
+import cn.topiam.employee.support.security.userdetails.DataOrigin;
 
-import co.elastic.clients.elasticsearch._types.FieldSort;
-import co.elastic.clients.elasticsearch._types.FieldValue;
-import co.elastic.clients.elasticsearch._types.SortOptions;
-import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
-import co.elastic.clients.elasticsearch._types.query_dsl.TermsQueryField;
-import static cn.topiam.employee.audit.entity.Actor.ACTOR_ID;
-import static cn.topiam.employee.audit.entity.Event.EVENT_TIME;
-import static cn.topiam.employee.audit.entity.Event.EVENT_TYPE;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Predicate;
+import static cn.topiam.employee.audit.entity.AuditEntity.*;
 import static cn.topiam.employee.audit.enums.TargetType.PORTAL;
+import static cn.topiam.employee.audit.event.type.EventType.APP_SSO;
 import static cn.topiam.employee.audit.event.type.EventType.LOGIN_PORTAL;
 import static cn.topiam.employee.audit.service.converter.AuditDataConverter.SORT_EVENT_TIME;
-import static cn.topiam.employee.common.util.ImageAvatarUtils.bufferedImageToBase64;
-import static cn.topiam.employee.common.util.ImageAvatarUtils.generateAvatarImg;
+import static cn.topiam.employee.support.util.ImageAvatarUtils.*;
 import static cn.topiam.employee.support.util.PhoneNumberUtils.getPhoneAreaCode;
 import static cn.topiam.employee.support.util.PhoneNumberUtils.getPhoneNumber;
 
@@ -93,9 +82,8 @@ public interface UserConverter {
             for (UserPO user : page.getContent()) {
                 UserListResult userListResult = userPoConvertToUserListResult(user);
                 if (org.apache.commons.lang3.StringUtils.isEmpty(userListResult.getAvatar())) {
-                    userListResult.setAvatar(bufferedImageToBase64(
-                        generateAvatarImg(org.apache.commons.lang3.StringUtils.defaultString(
-                            userListResult.getFullName(), userListResult.getUsername()))));
+                    userListResult.setAvatar(bufferedImageToBase64(generateAvatarImg(Objects
+                        .toString(userListResult.getFullName(), userListResult.getUsername()))));
                 } else {
                     userListResult.setAvatar(userListResult.getAvatar());
                 }
@@ -145,14 +133,14 @@ public interface UserConverter {
         userEntity.setFullName(param.getFullName());
         userEntity.setNickName(param.getNickName());
         userEntity.setLastUpdatePasswordTime(LocalDateTime.now());
-        userEntity.setStatus(cn.topiam.employee.common.enums.UserStatus.ENABLE);
-        userEntity.setAvatar(CommonConstants.getRandomAvatar());
-        userEntity.setDataOrigin(cn.topiam.employee.common.enums.DataOrigin.INPUT);
+        userEntity.setStatus(cn.topiam.employee.common.enums.UserStatus.ENABLED);
+        userEntity.setAvatar(getRandomAvatar());
+        userEntity.setDataOrigin(DataOrigin.INPUT.getType());
         userEntity.setExpireDate(
             java.util.Objects.isNull(param.getExpireDate()) ? java.time.LocalDate.of(2116, 12, 31)
                 : param.getExpireDate());
         userEntity.setAuthTotal(0L);
-        userEntity.setPassword(cn.topiam.employee.support.context.ApplicationContextHelp
+        userEntity.setPassword(cn.topiam.employee.support.context.ApplicationContextService
             .getBean(org.springframework.security.crypto.password.PasswordEncoder.class)
             .encode(param.getPassword()));
 
@@ -171,7 +159,7 @@ public interface UserConverter {
         }
         UserEntity userEntity = new UserEntity();
         if (param.getId() != null) {
-            userEntity.setId(Long.parseLong(param.getId()));
+            userEntity.setId(param.getId());
         }
         userEntity.setRemark(param.getRemark());
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(param.getEmail())) {
@@ -199,7 +187,7 @@ public interface UserConverter {
      */
     @Mapping(target = "id", source = "user.id")
     @Mapping(target = "username", source = "user.username")
-    @Mapping(target = "dataOrigin", source = "user.dataOrigin.code")
+    @Mapping(target = "dataOrigin", source = "user.dataOrigin")
     @Mapping(target = "emailVerified", source = "user.emailVerified")
     @Mapping(target = "phoneVerified", source = "user.phoneVerified")
     @Mapping(target = "expireDate", source = "user.expireDate")
@@ -226,7 +214,7 @@ public interface UserConverter {
      * @param param {@link UserUpdateParam}
      * @return {@link UserDetailEntity}
      */
-    @Mapping(target = "deleted", ignore = true)
+
     @Mapping(target = "website", ignore = true)
     @Mapping(target = "idType", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
@@ -242,7 +230,7 @@ public interface UserConverter {
      * @param param {@link  UserCreateParam}
      * @return {@link  UserDetailEntity}
      */
-    @Mapping(target = "deleted", ignore = true)
+
     @Mapping(target = "website", ignore = true)
     @Mapping(target = "idType", ignore = true)
     @Mapping(target = "userId", ignore = true)
@@ -259,90 +247,74 @@ public interface UserConverter {
      * 审计列表请求到本机搜索查询
      *
      * @param id   {@link Long}
-     * @param page {@link PageModel}
-     * @return {@link NativeQuery}
+     * @return {@link Specification}
      */
-    default NativeQuery auditListRequestConvertToNativeQuery(Long id, PageModel page) {
-        //构建查询 builder下有 must、should 以及 mustNot 相当于 sql 中的 and、or 以及 not
-        BoolQuery.Builder queryBuilder = QueryBuilders.bool();
-        List<SortOptions> fieldSortBuilders = Lists.newArrayList();
-        //事件类型
-        List<FieldValue> set = new ArrayList<>();
-        set.add(FieldValue.of(LOGIN_PORTAL.getCode()));
-        set.add(FieldValue.of(EventType.APP_SSO.getCode()));
-        queryBuilder.must(QueryBuilders.terms(builder -> {
-            builder.terms(new TermsQueryField.Builder().value(set).build());
-            builder.field(EVENT_TYPE);
-            return builder;
-        }));
-        //用户id
-        queryBuilder.must(Queries.termQueryAsQuery(ACTOR_ID, id.toString()));
-        //字段排序
-        page.getSorts().forEach(sort -> {
-            co.elastic.clients.elasticsearch._types.SortOrder sortOrder;
-            if (org.apache.commons.lang3.StringUtils.equals(sort.getSorter(), SORT_EVENT_TIME)) {
-                if (sort.getAsc()) {
-                    sortOrder = co.elastic.clients.elasticsearch._types.SortOrder.Asc;
-                } else {
-                    sortOrder = SortOrder.Desc;
+    default Specification<AuditEntity> auditListRequestConvertToSpecification(String id,
+                                                                              PageModel pageModel) {
+        //@formatter:off
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            List<Order> orders = new ArrayList<>();
+            predicates.add(cb.in(root.get(EVENT_TYPE_FIELD_NAME)).value(Arrays.asList(LOGIN_PORTAL, APP_SSO)));
+            cb.equal(root.get(ACTOR_ID_FIELD_NAME), id);
+            //默认降序
+            orders.add(cb.desc(root.get(EVENT_TIME_FIELD_NAME)));
+            for (PageModel.Sort sort : pageModel.getSorts()) {
+                if (org.apache.commons.lang3.StringUtils.equals(sort.getSorter(),
+                    SORT_EVENT_TIME)) {
+                    if (sort.getAsc()) {
+                        orders.add(cb.asc(root.get(EVENT_TIME_FIELD_NAME)));
+                    }
                 }
-            } else {
-                sortOrder = SortOrder.Desc;
             }
-            SortOptions eventTimeSortBuilder = SortOptions
-                .of(s -> s.field(FieldSort.of(f -> f.field(EVENT_TIME).order(sortOrder))));
-            fieldSortBuilders.add(eventTimeSortBuilder);
-        });
-        NativeQueryBuilder nativeQueryBuilder = new NativeQueryBuilder()
-            .withQuery(queryBuilder.build()._toQuery())
-            //分页参数
-            .withPageable(PageRequest.of(page.getCurrent(), page.getPageSize()));
-        if (!CollectionUtils.isEmpty(fieldSortBuilders)) {
-            //排序
-            nativeQueryBuilder.withSort(fieldSortBuilders);
-        }
-        return nativeQueryBuilder.build();
+            query.where(cb.and(predicates.toArray(new Predicate[0])));
+            query.orderBy(orders);
+            return query.getRestriction();
+        };
+        //@formatter:on
     }
 
     /**
      * searchHits 转用户登录日志列表
      *
-     * @param search {@link SearchHits}
+     * @param auditEntityPage {@link Page}
      * @param page   {@link PageModel}
      * @return {@link Page}
      */
-    default Page<UserLoginAuditListResult> searchHitsConvertToAuditListResult(SearchHits<AuditElasticSearchEntity> search,
-                                                                              PageModel page) {
+    default Page<UserLoginAuditListResult> entityConvertToAuditListResult(org.springframework.data.domain.Page<AuditEntity> auditEntityPage,
+                                                                          PageModel page) {
         List<UserLoginAuditListResult> list = new ArrayList<>();
         //总记录数
-        search.forEach(hit -> {
-            AuditElasticSearchEntity content = hit.getContent();
-            Event event = content.getEvent();
+        auditEntityPage.forEach(audit -> {
             UserLoginAuditListResult result = new UserLoginAuditListResult();
+            result.setId(audit.getId());
             //单点登录
-            if (event.getType().getCode().equals(PortalEventType.APP_SSO.getCode())) {
-                result.setAppName(getAppName(content.getTargets().get(0).getId()));
+            if (audit.getEventType().getCode().equals(PortalEventType.APP_SSO.getCode())) {
+                result.setAppName(getAppName(audit.getTargets().get(0).getId()));
             }
             //登录门户
-            if (event.getType().getCode().equals(PortalEventType.LOGIN_PORTAL.getCode())) {
+            if (audit.getEventType().getCode().equals(PortalEventType.LOGIN_PORTAL.getCode())) {
                 result.setAppName(PORTAL.getDesc());
             }
-            result.setEventTime(event.getTime());
-            result.setClientIp(content.getGeoLocation().getIp());
-            result.setBrowser(content.getUserAgent().getBrowser());
-            result.setLocation(content.getGeoLocation().getCityName());
-            result.setEventStatus(event.getStatus());
+            UserAgent userAgent = audit.getUserAgent();
+            GeoLocation geoLocation = audit.getGeoLocation();
+            result.setEventTime(audit.getEventTime());
+            result.setClientIp(geoLocation.getIp());
+            result.setLocation(geoLocation.getCityName());
+            result.setBrowser(userAgent.getBrowser());
+            result.setPlatform(userAgent.getPlatform() + " " + userAgent.getPlatformVersion());
+            result.setEventStatus(audit.getEventStatus());
             list.add(result);
         });
         //@formatter:off
-        Page<UserLoginAuditListResult> result = new Page<>();
-        result.setPagination(Page.Pagination.builder()
-                .total(search.getTotalHits())
-                .totalPages(Math.toIntExact(search.getTotalHits() / page.getPageSize()))
-                .current(page.getCurrent() + 1)
-                .build());
-        result.setList(list);
-        //@formatter:on
+            Page<UserLoginAuditListResult> result = new Page<>();
+            result.setPagination(Page.Pagination.builder()
+                    .total(auditEntityPage.getTotalElements())
+                    .totalPages(auditEntityPage.getTotalPages())
+                    .current(page.getCurrent() + 1)
+                    .build());
+            result.setList(list);
+            //@formatter:on
         return result;
     }
 
@@ -355,7 +327,7 @@ public interface UserConverter {
     @Mapping(target = "status", source = "status.code")
     @Mapping(target = "phone", ignore = true)
     @Mapping(target = "authTotal", defaultValue = "0L", source = "authTotal")
-    @Mapping(target = "dataOrigin", source = "dataOrigin.code")
+    @Mapping(target = "dataOrigin", source = "dataOrigin")
     UserListResult userPoConvertToUserListResult(UserPO po);
 
     /**
@@ -368,8 +340,8 @@ public interface UserConverter {
         if (!StringUtils.hasText(targetId)) {
             return null;
         }
-        AppRepository repository = ApplicationContextHelp.getBean(AppRepository.class);
-        AppEntity app = repository.findById(Long.valueOf(targetId)).orElse(new AppEntity());
+        AppRepository repository = ApplicationContextService.getBean(AppRepository.class);
+        AppEntity app = repository.findById(targetId).orElse(new AppEntity());
         return app.getName();
     }
 

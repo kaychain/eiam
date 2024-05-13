@@ -27,7 +27,7 @@ import static cn.topiam.employee.support.security.userdetails.UserType.ADMIN;
  * 账户资源
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2021/11/24 22:58
+ * Created by support@topiam.cn on 2021/11/24 22:58
  */
 public class AccountEventType {
 
@@ -107,6 +107,11 @@ public class AccountEventType {
     public static Type MODIFY_USER_PASSWORD                  = new Type(
         "eiam:event:account:update_password", "修改密码", ORG_ACCOUNT_RESOURCE, List.of(ADMIN));
 
+    /**
+     * 解锁用户
+     */
+    public static Type UNLOCK_USER                           = new Type(
+        "eiam:event:account:unlock_user", "解锁用户", ORG_ACCOUNT_RESOURCE, List.of(ADMIN));
     /**
      * 创建用户组
      */

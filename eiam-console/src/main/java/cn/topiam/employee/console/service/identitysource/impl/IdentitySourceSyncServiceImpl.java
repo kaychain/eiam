@@ -17,22 +17,18 @@
  */
 package cn.topiam.employee.console.service.identitysource.impl;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.data.querydsl.QPageRequest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
 
 import cn.topiam.employee.audit.context.AuditContext;
 import cn.topiam.employee.audit.entity.Target;
 import cn.topiam.employee.common.entity.identitysource.IdentitySourceEntity;
 import cn.topiam.employee.common.entity.identitysource.IdentitySourceSyncHistoryEntity;
 import cn.topiam.employee.common.entity.identitysource.IdentitySourceSyncRecordEntity;
-import cn.topiam.employee.common.entity.identitysource.QIdentitySourceSyncHistoryEntity;
 import cn.topiam.employee.common.repository.identitysource.IdentitySourceSyncHistoryRepository;
 import cn.topiam.employee.common.repository.identitysource.IdentitySourceSyncRecordRepository;
 import cn.topiam.employee.console.converter.identitysource.IdentitySourceSyncConverter;
@@ -55,7 +51,7 @@ import static cn.topiam.employee.audit.enums.TargetType.IDENTITY_SOURCE;
  * 同步身份源同步
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2022/3/16 21:04
+ * Created by support@topiam.cn on 2022/3/16 21:04
  */
 @Slf4j
 @Service
@@ -72,16 +68,12 @@ public class IdentitySourceSyncServiceImpl implements IdentitySourceSyncService 
     public Page<IdentitySourceSyncHistoryListResult> getIdentitySourceSyncHistoryList(IdentitySourceSyncHistoryListQuery query,
                                                                                       PageModel pageModel) {
         //查询条件
-        Predicate predicate = identitySourceSyncConverter
-            .queryIdentitySourceSyncHistoryListQueryConvertToPredicate(query);
-        //分页条件
-        OrderSpecifier<LocalDateTime> desc = QIdentitySourceSyncHistoryEntity.identitySourceSyncHistoryEntity.createTime
-            .desc();
-        QPageRequest request = QPageRequest.of(pageModel.getCurrent(), pageModel.getPageSize(),
-            desc);
+        Specification<IdentitySourceSyncHistoryEntity> specification = identitySourceSyncConverter
+            .queryIdentitySourceSyncHistoryListQueryConvertToSpecification(query);
+        PageRequest request = PageRequest.of(pageModel.getCurrent(), pageModel.getPageSize());
         //查询映射
         org.springframework.data.domain.Page<IdentitySourceSyncHistoryEntity> list = identitySourceSyncHistoryRepository
-            .findAll(predicate, request);
+            .findAll(specification, request);
         return identitySourceSyncConverter.entityConvertToIdentitySourceSyncHistoryListResult(list);
     }
 
@@ -96,13 +88,13 @@ public class IdentitySourceSyncServiceImpl implements IdentitySourceSyncService 
     public Page<IdentitySourceSyncRecordListResult> getIdentitySourceSyncRecordList(IdentitySourceSyncRecordListQuery query,
                                                                                     PageModel pageModel) {
         //查询条件
-        Predicate predicate = identitySourceSyncConverter
-            .queryIdentitySourceSyncRecordListQueryConvertToPredicate(query);
+        Specification<IdentitySourceSyncRecordEntity> specification = identitySourceSyncConverter
+            .queryIdentitySourceSyncRecordListQueryConvertToSpecification(query);
         //分页条件
-        QPageRequest request = QPageRequest.of(pageModel.getCurrent(), pageModel.getPageSize());
+        PageRequest request = PageRequest.of(pageModel.getCurrent(), pageModel.getPageSize());
         //查询映射
         org.springframework.data.domain.Page<IdentitySourceSyncRecordEntity> list = identitySourceSyncRecordRepository
-            .findAll(predicate, request);
+            .findAll(specification, request);
         return identitySourceSyncConverter.entityConvertToIdentitySourceSyncRecordListResult(list);
     }
 
@@ -114,7 +106,8 @@ public class IdentitySourceSyncServiceImpl implements IdentitySourceSyncService 
     @Override
     public void executeIdentitySourceSync(String id) {
         IdentitySourceEntity entity = identitySourceService.getIdentitySource(id);
-        AuditContext.setTarget(Target.builder().id(id).type(IDENTITY_SOURCE).build());
+        AuditContext.setTarget(
+            Target.builder().id(id).name(entity.getName()).type(IDENTITY_SOURCE).build());
         if (!ObjectUtils.isEmpty(entity)) {
             if (Objects.isNull(entity.getBasicConfig())) {
                 throw new NullPointerException("请完善参数配置");

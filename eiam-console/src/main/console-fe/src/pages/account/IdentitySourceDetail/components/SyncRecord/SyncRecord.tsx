@@ -130,7 +130,11 @@ export default (props: SyncRecordProps) => {
       onClose={onClose}
       width={630}
       destroyOnClose
-      bodyStyle={{ paddingTop: 0 }}
+      styles={{
+        body: {
+          paddingTop: 0,
+        },
+      }}
     >
       <ProTable<AccountAPI.ListIdentitySourceSyncRecord>
         actionRef={actionRef}

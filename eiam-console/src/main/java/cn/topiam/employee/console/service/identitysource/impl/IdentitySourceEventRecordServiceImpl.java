@@ -17,16 +17,11 @@
  */
 package cn.topiam.employee.console.service.identitysource.impl;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.querydsl.QPageRequest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
-
 import cn.topiam.employee.common.entity.identitysource.IdentitySourceEventRecordEntity;
-import cn.topiam.employee.common.entity.identitysource.QIdentitySourceEventRecordEntity;
 import cn.topiam.employee.common.repository.identitysource.IdentitySourceEventRecordRepository;
 import cn.topiam.employee.console.converter.identitysource.IdentitySourceEventRecordConverter;
 import cn.topiam.employee.console.pojo.query.identity.IdentitySourceEventRecordListQuery;
@@ -41,7 +36,7 @@ import lombok.AllArgsConstructor;
  * 身份源事件记录
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2022/3/16 21:04
+ * Created by support@topiam.cn on 2022/3/16 21:04
  */
 @Service
 @AllArgsConstructor
@@ -58,17 +53,13 @@ public class IdentitySourceEventRecordServiceImpl implements IdentitySourceEvent
     public Page<IdentitySourceEventRecordListResult> getIdentitySourceEventRecordList(IdentitySourceEventRecordListQuery query,
                                                                                       PageModel pageModel) {
         //查询条件
-        Predicate predicate = identitySourceEventRecordConverter
-            .queryIdentitySourceEventRecordListQueryConvertToPredicate(query);
+        Specification<IdentitySourceEventRecordEntity> specification = identitySourceEventRecordConverter
+            .queryIdentitySourceEventRecordListQueryConvertToSpecification(query);
         //分页条件
-        OrderSpecifier<LocalDateTime> desc = QIdentitySourceEventRecordEntity.identitySourceEventRecordEntity.eventTime
-            .desc();
-        //分页条件
-        QPageRequest request = QPageRequest.of(pageModel.getCurrent(), pageModel.getPageSize(),
-            desc);
         //查询映射
         org.springframework.data.domain.Page<IdentitySourceEventRecordEntity> list = identitySourceEventRecordRepository
-            .findAll(predicate, request);
+            .findAll(specification,
+                PageRequest.of(pageModel.getCurrent(), pageModel.getPageSize()));
         return identitySourceEventRecordConverter
             .entityConvertToIdentitySourceSyncRecordListResult(list);
     }

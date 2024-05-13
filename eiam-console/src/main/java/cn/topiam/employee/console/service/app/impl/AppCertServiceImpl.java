@@ -34,7 +34,7 @@ import lombok.AllArgsConstructor;
  * 应用证书
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2022/5/31 21:46
+ * Created by support@topiam.cn on 2022/5/31 21:46
  */
 @Service
 @AllArgsConstructor
@@ -48,8 +48,8 @@ public class AppCertServiceImpl implements AppCertService {
      */
     @Override
     public List<AppCertListResult> getAppCertListResult(AppCertQuery query) {
-        List<AppCertEntity> list = (List<AppCertEntity>) appCertRepository
-            .findAll(appCertConverter.queryAppCertListParamConvertToPredicate(query));
+        List<AppCertEntity> list = appCertRepository
+            .findAll(appCertConverter.queryAppCertListParamConvertToExample(query));
         return appCertConverter.entityConvertToAppCertListResult(list);
     }
 

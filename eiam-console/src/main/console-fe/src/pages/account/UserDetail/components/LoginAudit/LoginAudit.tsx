@@ -55,6 +55,13 @@ export default (props: { userId: string }) => {
       },
     },
     {
+      title: intl.formatMessage({ id: 'pages.account.user_detail.login_audit.columns.platform' }),
+      ellipsis: true,
+      dataIndex: 'platform',
+      width: 110,
+      search: false,
+    },
+    {
       title: intl.formatMessage({ id: 'pages.account.user_detail.login_audit.columns.browser' }),
       dataIndex: 'browser',
       search: false,
@@ -70,6 +77,7 @@ export default (props: { userId: string }) => {
       sorter: true,
       valueType: 'dateTime',
       search: false,
+      ellipsis: true,
     },
     {
       title: intl.formatMessage({
@@ -78,7 +86,7 @@ export default (props: { userId: string }) => {
       dataIndex: 'eventStatus',
       search: false,
       align: 'center',
-      render: (text: any, row: any) => (
+      render: (_text: any, row: any) => (
         <Space>
           {row.eventStatus === EventStatus.success && (
             <Tag color="#87d068">{intl.formatMessage({ id: 'app.success' })}</Tag>
@@ -96,6 +104,8 @@ export default (props: { userId: string }) => {
       <ProTable
         columns={columns}
         search={false}
+        rowKey={'id'}
+        scroll={{ x: 900 }}
         request={getLoginAuditList}
         params={{ userId: userId }}
         pagination={{ pageSize: 10 }}

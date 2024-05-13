@@ -20,9 +20,7 @@
  */
 export enum UserDetailTabs {
   //用户信息
-  user_info = 'user-info',
-  //应用授权
-  app_access = 'app_access',
+  user_info = 'user_info',
   //登录审计
-  login_audit = 'login-audit',
+  login_audit = 'login_audit',
 }

@@ -102,9 +102,11 @@ const Welcome: React.FC = () => {
         style={{
           borderRadius: 8,
         }}
-        bodyStyle={{
-          backgroundImage:
-            'radial-gradient(circle at 97% 10%, #EBF2FF 0%, #F5F8FF 28%, #EBF1FF 124%)',
+        styles={{
+          body: {
+            backgroundImage:
+              'radial-gradient(circle at 97% 10%, #EBF2FF 0%, #F5F8FF 28%, #EBF1FF 124%)',
+          },
         }}
       >
         <div
@@ -125,7 +127,7 @@ const Welcome: React.FC = () => {
           </div>
           <p
             style={{
-              fontSize: '14px',
+              fontSize: '15px',
               color: 'rgba(0,0,0,0.65)',
               lineHeight: '22px',
               marginTop: 16,
@@ -133,7 +135,7 @@ const Welcome: React.FC = () => {
               width: '65%',
             }}
           >
-            TopIAM 数字身份管控平台（Employee Identity and Access
+            TOPIAM 数字身份管控平台（Employee Identity and Access
             Management）用于管理企业内员工的账号、权限、身份认证、应用访问，帮助整合部署在本地或云端的内部办公系统、业务系统及三方
             SaaS 系统的所有身份，实现一个账号打通所有应用的服务。
           </p>
@@ -172,7 +174,7 @@ const Welcome: React.FC = () => {
             <InfoCard
               index={4}
               title="实现应用单点登录"
-              href="https://eiam.topiam.cn/docs/application/"
+              href="https://eiam.topiam.cn/docs/portal/"
               desc="创建配置应用，实现应用单点登录。"
             />
             <InfoCard

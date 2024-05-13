@@ -24,10 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Predicate;
-
-import cn.topiam.employee.common.entity.account.QUserEntity;
 import cn.topiam.employee.common.entity.account.UserEntity;
 import cn.topiam.employee.common.enums.UserStatus;
 import cn.topiam.employee.common.repository.account.UserRepository;
@@ -35,13 +31,13 @@ import cn.topiam.employee.support.lock.Lock;
 import cn.topiam.employee.support.trace.Trace;
 
 import lombok.RequiredArgsConstructor;
-import static cn.topiam.employee.core.help.SettingHelp.getAutoUnlockTime;
+import static cn.topiam.employee.core.context.ContextService.getAutoUnlockTime;
 
 /**
  * 用户锁定自动解锁任务
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2022/4/17 21:22
+ * Created by support@topiam.cn on 2022/4/17 21:22
  */
 @RequiredArgsConstructor
 public class UserUnlockTask {
@@ -56,27 +52,20 @@ public class UserUnlockTask {
     @Scheduled(cron = "0 */1 * * * ?")
     public void execute() {
         logger.info("用户自动解锁任务开始");
-        QUserEntity qUserEntity = QUserEntity.userEntity;
-        Predicate predicate = ExpressionUtils.and(qUserEntity.isNotNull(),
-            qUserEntity.deleted.eq(Boolean.FALSE));
-        //查询条件
-        //@formatter:off
-        predicate = ExpressionUtils.and(predicate, qUserEntity.status.eq(UserStatus.LOCKED));
-        List<UserEntity> list = (List<UserEntity>) userRepository.findAll(predicate);
-        logger.info("待解锁用户数量: [{}] ",list.size());
-        for (UserEntity entity:list) {
-            logger.info("开始解锁用户：{}",entity.getUsername());
+        List<UserEntity> list = userRepository.findAllByStatus(UserStatus.LOCKED);
+        logger.info("待解锁用户数量: [{}] ", list.size());
+        for (UserEntity entity : list) {
+            logger.info("开始解锁用户: {}", entity.getUsername());
             LocalDateTime updateTime = entity.getUpdateTime();
             Integer unlockTime = getAutoUnlockTime();
-            if (updateTime.plusMinutes(unlockTime).isBefore(LocalDateTime.now())){
-                entity.setStatus(UserStatus.ENABLE);
+            if (updateTime.plusMinutes(unlockTime).isBefore(LocalDateTime.now())) {
+                entity.setStatus(UserStatus.ENABLED);
                 userRepository.save(entity);
-                logger.info("成功解锁用户：{}",entity.getUsername());
+                logger.info("成功解锁用户: {}", entity.getUsername());
             }
         }
         logger.info("用户自动解锁任务结束");
     }
-
 
     /**
      * UserRepository

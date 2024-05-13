@@ -75,7 +75,7 @@ const Code = (props: ProFormProps) => {
             },
             {
               validateTrigger: ['onBlur'],
-              validator: async (rule, value) => {
+              validator: async (_rule, value) => {
                 if (!value) {
                   return Promise.resolve();
                 }
@@ -99,7 +99,7 @@ const Code = (props: ProFormProps) => {
                 if (isPhone) {
                   return;
                 }
-                return Promise.reject<any>(
+                return Promise.reject<Error>(
                   new Error(
                     intl.formatMessage({
                       id: 'pages.login.recipient.invalid',

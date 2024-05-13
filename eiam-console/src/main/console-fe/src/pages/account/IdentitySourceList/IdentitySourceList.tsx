@@ -17,22 +17,22 @@
  */
 import {
   createIdentitySource,
-  deleteIdentitySource,
   disableIdentitySource,
   enableIdentitySource,
   getIdentityProviderList,
 } from './service';
 import { history } from '@@/core/history';
-import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType } from '@ant-design/pro-components';
 import { PageContainer, ProList } from '@ant-design/pro-components';
-import { App, Avatar, Button, Popconfirm, Tag } from 'antd';
+import { App, Avatar, Button, Tag } from 'antd';
 import { Fragment, useRef, useState } from 'react';
 import CreateModal from './components/CreateModal';
 import useStyle from './style';
 import classnames from 'classnames';
 import { ICON_LIST } from '@/components/IconFont/constant';
 import { useIntl } from '@umijs/max';
+import { deleteIdentitySource } from '@/services/account';
 
 const prefixCls = 'identity-source-list';
 
@@ -122,7 +122,7 @@ export default () => {
             },
             avatar: {
               search: false,
-              render: (text, row) => {
+              render: (_text, row) => {
                 return (
                   <Avatar key={row.id} shape="square" size={50} src={ICON_LIST[row.provider]} />
                 );
@@ -136,61 +136,71 @@ export default () => {
             },
             content: {
               search: false,
-              render: (text, row) => [<ListContent key="context" {...row} />],
+              render: (_text, row) => [<ListContent key="context" {...row} />],
             },
             actions: {
-              render: (text, row) => [
+              render: (_text, row) => [
                 <Fragment key={'status'}>
                   {row.enabled ? (
-                    <Popconfirm
-                      title={intl.formatMessage({
-                        id: 'pages.account.identity_source_list.metas.actions.popconfirm.title.disable',
-                      })}
-                      placement="bottomRight"
-                      icon={
-                        <QuestionCircleOutlined
-                          style={{
-                            color: 'red',
-                          }}
-                        />
-                      }
-                      onConfirm={async () => {
-                        const { success, result } = await disableIdentitySource(row.id);
-                        if (success && result) {
-                          message.success(intl.formatMessage({ id: 'app.operation_success' }));
-                          await actionRef.current?.reload();
-                          return;
-                        }
-                      }}
-                      okText={intl.formatMessage({ id: 'app.yes' })}
-                      cancelText={intl.formatMessage({ id: 'app.no' })}
+                    <a
                       key="disabled"
+                      onClick={() => {
+                        const confirmed = modal.warning({
+                          title: intl.formatMessage({
+                            id: 'pages.account.identity_source_list.metas.actions.disable_title',
+                          }),
+                          content: intl.formatMessage({
+                            id: 'pages.account.identity_source_list.metas.actions.disable_content',
+                          }),
+                          okText: intl.formatMessage({ id: 'app.confirm' }),
+                          centered: true,
+                          okType: 'primary',
+                          okCancel: true,
+                          cancelText: intl.formatMessage({ id: 'app.cancel' }),
+                          onOk: async () => {
+                            const { success } = await disableIdentitySource(row.id);
+                            if (success) {
+                              confirmed.destroy();
+                              message.success(intl.formatMessage({ id: 'app.operation_success' }));
+                              actionRef.current?.reload();
+                              return;
+                            }
+                          },
+                        });
+                      }}
                     >
-                      <a key="disabled">{intl.formatMessage({ id: 'app.disable' })}</a>
-                    </Popconfirm>
+                      {intl.formatMessage({ id: 'app.disable' })}
+                    </a>
                   ) : (
-                    <Popconfirm
-                      title={intl.formatMessage({
-                        id: 'pages.account.identity_source_list.metas.actions.popconfirm.title.enable',
-                      })}
-                      placement="bottomRight"
-                      icon={<QuestionCircleOutlined />}
-                      onConfirm={async () => {
-                        const { success, result } = await enableIdentitySource(row.id);
-                        if (success && result) {
-                          message
-                            .success(intl.formatMessage({ id: 'app.operation_success' }))
-                            .then();
-                          await actionRef.current?.reload();
-                          return;
-                        }
+                    <a
+                      key="enabled"
+                      onClick={() => {
+                        const confirmed = modal.warning({
+                          title: intl.formatMessage({
+                            id: 'pages.account.identity_source_list.metas.actions.enable_title',
+                          }),
+                          content: intl.formatMessage({
+                            id: 'pages.account.identity_source_list.metas.actions.enable_content',
+                          }),
+                          okText: intl.formatMessage({ id: 'app.confirm' }),
+                          centered: true,
+                          okType: 'primary',
+                          okCancel: true,
+                          cancelText: intl.formatMessage({ id: 'app.cancel' }),
+                          onOk: async () => {
+                            const { success } = await enableIdentitySource(row.id);
+                            if (success) {
+                              confirmed.destroy();
+                              message.success(intl.formatMessage({ id: 'app.operation_success' }));
+                              actionRef.current?.reload();
+                              return;
+                            }
+                          },
+                        });
                       }}
-                      okText={intl.formatMessage({ id: 'app.yes' })}
-                      cancelText={intl.formatMessage({ id: 'app.no' })}
-                      key="disabled"
                     >
-                      <a key="enabled">{intl.formatMessage({ id: 'app.enable' })}</a>
-                    </Popconfirm>
+                      {intl.formatMessage({ id: 'app.enable' })}
+                    </a>
                   )}
                 </Fragment>,
                 <a
@@ -201,40 +211,39 @@ export default () => {
                 >
                   {intl.formatMessage({ id: 'app.detail' })}
                 </a>,
-                <Popconfirm
-                  title={intl.formatMessage({
-                    id: 'pages.account.identity_source_list.metas.actions.popconfirm.delete',
-                  })}
-                  placement="bottomRight"
-                  icon={
-                    <QuestionCircleOutlined
-                      style={{
-                        color: 'red',
-                      }}
-                    />
-                  }
-                  onConfirm={async () => {
-                    const { success, result } = await deleteIdentitySource(row.id);
-                    if (success && result) {
-                      message.success(intl.formatMessage({ id: 'app.operation_success' }));
-                      await actionRef.current?.reload();
-                      return;
-                    }
+                <a
+                  target="_blank"
+                  style={{
+                    color: 'red',
                   }}
-                  okText={intl.formatMessage({ id: 'app.yes' })}
-                  cancelText={intl.formatMessage({ id: 'app.no' })}
-                  key="delete"
+                  key="remove"
+                  onClick={() => {
+                    const confirmed = modal.error({
+                      title: intl.formatMessage({
+                        id: 'pages.account.identity_source_list.metas.actions.delete_title',
+                      }),
+                      content: intl.formatMessage({
+                        id: 'pages.account.identity_source_list.metas.actions.delete_content',
+                      }),
+                      okText: intl.formatMessage({ id: 'app.confirm' }),
+                      centered: true,
+                      okType: 'primary',
+                      okCancel: true,
+                      cancelText: intl.formatMessage({ id: 'app.cancel' }),
+                      onOk: async () => {
+                        const { success } = await deleteIdentitySource(row.id);
+                        if (success) {
+                          confirmed.destroy();
+                          message.success(intl.formatMessage({ id: 'app.operation_success' }));
+                          actionRef.current?.reload();
+                          return;
+                        }
+                      },
+                    });
+                  }}
                 >
-                  <a
-                    target="_blank"
-                    style={{
-                      color: 'red',
-                    }}
-                    key="remove"
-                  >
-                    {intl.formatMessage({ id: 'app.delete' })}
-                  </a>
-                </Popconfirm>,
+                  {intl.formatMessage({ id: 'app.delete' })}
+                </a>,
               ],
             },
           }}

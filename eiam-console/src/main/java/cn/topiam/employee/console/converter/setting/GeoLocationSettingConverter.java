@@ -19,6 +19,7 @@ package cn.topiam.employee.console.converter.setting;
 
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,20 +39,20 @@ import cn.topiam.employee.console.pojo.result.setting.EmailProviderConfigResult;
 import cn.topiam.employee.console.pojo.result.setting.GeoIpProviderResult;
 import cn.topiam.employee.console.pojo.save.setting.GeoIpProviderSaveParam;
 import cn.topiam.employee.console.pojo.save.setting.MailProviderSaveParam;
-import cn.topiam.employee.support.context.ApplicationContextHelp;
+import cn.topiam.employee.support.context.ApplicationContextService;
 import cn.topiam.employee.support.exception.TopIamException;
 import cn.topiam.employee.support.validation.ValidationUtils;
 
 import jakarta.validation.ValidationException;
 import static cn.topiam.employee.common.geo.maxmind.MaxmindGeoLocationServiceImpl.MAXMIND;
 import static cn.topiam.employee.common.geo.maxmind.MaxmindGeoLocationServiceImpl.SHA256_URL;
-import static cn.topiam.employee.core.setting.constant.GeoIpProviderConstants.IPADDRESS_SETTING_NAME;
+import static cn.topiam.employee.core.setting.GeoIpProviderConstants.IPADDRESS_SETTING_NAME;
 
 /**
  * 地理位置设置转换器
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2021/10/1 23:18
+ * Created by support@topiam.cn on 2021/10/1 23:18
  */
 @Mapper(componentModel = "spring")
 public interface GeoLocationSettingConverter {
@@ -85,7 +86,7 @@ public interface GeoLocationSettingConverter {
                    throw new ValidationException(validationResult.getMessage());
                }
                try {
-                   ResponseEntity<String> checkConnect = ApplicationContextHelp.getBean(RestTemplate.class).getForEntity(
+                   ResponseEntity<String> checkConnect = ApplicationContextService.getBean(RestTemplate.class).getForEntity(
                            String.format(SHA256_URL,
                                    maxmindProviderConfig.getSessionKey()), String.class);
                    HttpStatusCode statusCode = checkConnect.getStatusCode();
@@ -115,27 +116,27 @@ public interface GeoLocationSettingConverter {
      */
     default GeoIpProviderResult entityToGeoLocationProviderConfig(SettingEntity entity) {
         //没有数据，默认未启用
-        if (Objects.isNull(entity)) {
+        if (Objects.isNull(entity) || StringUtils.isBlank(entity.getValue())) {
             return null;
         }
-       try {
-           String value = entity.getValue();
-           ObjectMapper objectMapper = EncryptionModule.deserializerDecrypt();
-           // 指定序列化输入的类型
-           objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),
-                   ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
-           // 根据提供商序列化
-           GeoLocationProviderConfig setting = objectMapper.readValue(value, GeoLocationProviderConfig.class);
-           if (MAXMIND.equals(setting.getProvider())) {
-               MaxmindProviderConfig config = (MaxmindProviderConfig) setting.getConfig();
-               //@formatter:off
-               return GeoIpProviderResult.builder()
-                       .provider(setting.getProvider().getProvider())
-                       .config(config)
-                       .enabled(true)
-                       .build();
-           }
-           //@formatter:on
+        try {
+            String value = entity.getValue();
+            ObjectMapper objectMapper = EncryptionModule.deserializerDecrypt();
+            // 指定序列化输入的类型
+            objectMapper.activateDefaultTyping(objectMapper.getPolymorphicTypeValidator(),
+                    ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+            // 根据提供商序列化
+            GeoLocationProviderConfig setting = objectMapper.readValue(value, GeoLocationProviderConfig.class);
+            if (MAXMIND.equals(setting.getProvider())) {
+                MaxmindProviderConfig config = (MaxmindProviderConfig) setting.getConfig();
+                //@formatter:off
+                return GeoIpProviderResult.builder()
+                        .provider(setting.getProvider().getProvider())
+                        .config(config)
+                        .enabled(true)
+                        .build();
+            }
+            //@formatter:on
             return null;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

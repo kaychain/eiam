@@ -19,14 +19,12 @@ package cn.topiam.employee.common.repository.account;
 
 import java.util.List;
 
-import com.querydsl.core.types.dsl.NumberExpression;
-
 import cn.topiam.employee.common.entity.account.OrganizationEntity;
 import cn.topiam.employee.common.entity.account.po.OrganizationPO;
 
 /**
  * @author TopIAM
- * Created by support@topiam.cn on  2022/2/13 21:27
+ * Created by support@topiam.cn on 2022/2/13 21:27
  */
 public interface OrganizationRepositoryCustomized {
 
@@ -45,19 +43,10 @@ public interface OrganizationRepositoryCustomized {
     void batchUpdate(List<OrganizationEntity> list);
 
     /**
-     * 获取组织列表
+     * 用户对应组织列表
      *
-     * @param idList {@link  List}
+     * @param userId {@link  String}
      * @return {@link List}
      */
-    List<OrganizationPO> getOrganizationList(List<String> idList);
-
-    /**
-     * 查询组织成员数量或id
-     *
-     * @param orgId {@link  String}
-     * @param orgId {@link  NumberExpression}
-     * @return {@link  List}
-     */
-    List<Long> getOrgMemberList(String orgId, NumberExpression<Long> expression);
+    List<OrganizationPO> getOrganizationList(String userId);
 }

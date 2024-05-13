@@ -17,7 +17,7 @@
  */
 import type { RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
-import { notification, message as Msg } from 'antd';
+import { message as Msg, notification } from 'antd';
 import { parse, stringify } from 'querystring';
 import { history } from '@@/core/history';
 
@@ -59,7 +59,7 @@ export const requestConfig: RequestConfig = {
               };
             }
             const href = history.createHref(settings);
-            window.location.replace(href);
+            history.push(href);
           }
           return;
         }

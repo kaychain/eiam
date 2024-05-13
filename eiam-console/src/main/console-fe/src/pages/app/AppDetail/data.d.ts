@@ -28,8 +28,6 @@ export type GetApp = {
   protocolName: string;
   clientId: string;
   clientSecret: string;
-  //sso发起方
-  initLoginType: string;
   //sso登录链接
   initLoginUrl: string;
   nameIdValueType: string;
@@ -39,4 +37,3 @@ export type GetApp = {
   remark: string;
   groupIds: string[];
 };
-

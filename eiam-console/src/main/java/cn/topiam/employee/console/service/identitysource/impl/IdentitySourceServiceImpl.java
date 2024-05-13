@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,17 +48,14 @@ import cn.topiam.employee.identitysource.dingtalk.DingTalkConfig;
 import cn.topiam.employee.identitysource.dingtalk.DingTalkConfigValidator;
 import cn.topiam.employee.identitysource.feishu.FeiShuConfig;
 import cn.topiam.employee.identitysource.feishu.FeiShuConfigValidator;
-import cn.topiam.employee.identitysource.wechatwork.WeChatWorkConfig;
-import cn.topiam.employee.identitysource.wechatwork.WeChatWorkConfigValidator;
 import cn.topiam.employee.support.exception.TopIamException;
 import cn.topiam.employee.support.repository.page.domain.PageModel;
-import cn.topiam.employee.support.repository.page.domain.QueryDslRequest;
 import cn.topiam.employee.support.util.BeanUtils;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import static cn.topiam.employee.support.repository.domain.BaseEntity.LAST_MODIFIED_BY;
-import static cn.topiam.employee.support.repository.domain.BaseEntity.LAST_MODIFIED_TIME;
+import static cn.topiam.employee.support.repository.base.BaseEntity.LAST_MODIFIED_BY;
+import static cn.topiam.employee.support.repository.base.BaseEntity.LAST_MODIFIED_TIME;
 
 /**
  * <p>
@@ -64,7 +63,7 @@ import static cn.topiam.employee.support.repository.domain.BaseEntity.LAST_MODIF
  * </p>
  *
  * @author TopIAM
- * Created by support@topiam.cn on  2020-08-16
+ * Created by support@topiam.cn on 2020-08-16
  */
 @Slf4j
 @Service
@@ -81,10 +80,11 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
     @Override
     public cn.topiam.employee.support.repository.page.domain.Page<IdentitySourceListResult> getIdentitySourceList(IdentitySourceListQuery query,
                                                                                                                   PageModel pageModel) {
-        QueryDslRequest request = identitySourceConverter
-            .queryIdentitySourceListParamConvertToPredicate(query, pageModel);
+        Specification<IdentitySourceEntity> specification = identitySourceConverter
+            .queryIdentitySourceListParamConvertToPredicate(query);
         org.springframework.data.domain.Page<IdentitySourceEntity> list = identitySourceRepository
-            .findAll(request.getPredicate(), request.getPageRequest());
+            .findAll(specification,
+                PageRequest.of(pageModel.getCurrent(), pageModel.getPageSize()));
         return identitySourceConverter.entityConverterToIdentitySourceListResult(list);
     }
 
@@ -96,8 +96,7 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
      */
     @Override
     public IdentitySourceEntity getIdentitySource(String id) {
-        Optional<IdentitySourceEntity> provider = identitySourceRepository
-            .findById(Long.valueOf(id));
+        Optional<IdentitySourceEntity> provider = identitySourceRepository.findById(id);
         return provider.orElse(null);
     }
 
@@ -112,9 +111,9 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
     public IdentitySourceCreateResult createIdentitySource(IdentitySourceCreateParam param) {
         IdentitySourceEntity entity = identitySourceConverter.createParamConverterToEntity(param);
         identitySourceRepository.save(entity);
-        AuditContext.setTarget(Target.builder().id(entity.getId().toString())
+        AuditContext.setTarget(Target.builder().id(entity.getId()).name(entity.getName())
             .type(TargetType.IDENTITY_SOURCE).build());
-        return new IdentitySourceCreateResult(entity.getId().toString());
+        return new IdentitySourceCreateResult(entity.getId());
     }
 
     /**
@@ -129,7 +128,7 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
         IdentitySourceEntity entity = getIdentitySource(param.getId());
         BeanUtils.merge(source, entity, LAST_MODIFIED_TIME, LAST_MODIFIED_BY);
         identitySourceRepository.save(entity);
-        AuditContext.setTarget(Target.builder().id(entity.getId().toString())
+        AuditContext.setTarget(Target.builder().id(entity.getId()).name(entity.getName())
             .type(TargetType.IDENTITY_SOURCE).build());
         return true;
     }
@@ -142,17 +141,16 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
      */
     @Override
     public Boolean disableIdentitySource(String id) {
-        Optional<IdentitySourceEntity> optional = identitySourceRepository
-            .findById(Long.valueOf(id));
+        Optional<IdentitySourceEntity> optional = identitySourceRepository.findById(id);
         //身份源不存在
         if (optional.isEmpty()) {
             AuditContext.setContent("操作失败，身份源不存在");
             log.warn(AuditContext.getContent());
             throw new TopIamException(AuditContext.getContent());
         }
-        Integer count = identitySourceRepository.updateIdentitySourceStatus(Long.valueOf(id),
-            Boolean.FALSE);
-        AuditContext.setTarget(Target.builder().id(id).type(TargetType.IDENTITY_SOURCE).build());
+        Integer count = identitySourceRepository.updateIdentitySourceStatus(id, Boolean.FALSE);
+        AuditContext.setTarget(Target.builder().id(id).name(optional.get().getName())
+            .type(TargetType.IDENTITY_SOURCE).build());
         return count > 0;
     }
 
@@ -164,17 +162,16 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
      */
     @Override
     public Boolean enableIdentitySource(String id) {
-        Optional<IdentitySourceEntity> optional = identitySourceRepository
-            .findById(Long.valueOf(id));
+        Optional<IdentitySourceEntity> optional = identitySourceRepository.findById(id);
         //用户不存在
         if (optional.isEmpty()) {
             AuditContext.setContent("操作失败，身份源不存在");
             log.warn(AuditContext.getContent());
             throw new TopIamException(AuditContext.getContent());
         }
-        Integer count = identitySourceRepository.updateIdentitySourceStatus(Long.valueOf(id),
-            Boolean.TRUE);
-        AuditContext.setTarget(Target.builder().id(id).type(TargetType.IDENTITY_SOURCE).build());
+        Integer count = identitySourceRepository.updateIdentitySourceStatus(id, Boolean.TRUE);
+        AuditContext.setTarget(Target.builder().id(id).name(optional.get().getName())
+            .type(TargetType.IDENTITY_SOURCE).build());
         return count > 0;
     }
 
@@ -186,16 +183,16 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
      */
     @Override
     public Boolean deleteIdentitySource(String id) {
-        Optional<IdentitySourceEntity> optional = identitySourceRepository
-            .findById(Long.valueOf(id));
+        Optional<IdentitySourceEntity> optional = identitySourceRepository.findById(id);
         //用户不存在
         if (optional.isEmpty()) {
             AuditContext.setContent("操作失败，身份源不存在");
             log.warn(AuditContext.getContent());
             throw new TopIamException(AuditContext.getContent());
         }
-        identitySourceRepository.deleteById(Long.valueOf(id));
-        AuditContext.setTarget(Target.builder().id(id).type(TargetType.IDENTITY_SOURCE).build());
+        identitySourceRepository.deleteById(id);
+        AuditContext.setTarget(Target.builder().id(id).name(optional.get().getName())
+            .type(TargetType.IDENTITY_SOURCE).build());
         return true;
     }
 
@@ -208,14 +205,13 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
     @Override
     public Boolean saveIdentitySourceConfig(IdentitySourceConfigSaveParam param) {
         IdentitySourceEntity entity = getIdentitySource(param.getId());
-        param.getBasicConfig().putAll(JSONObject.parseObject(entity.getBasicConfig()));
         //转换
         IdentitySourceEntity source = identitySourceConverter
             .saveConfigParamConverterToEntity(param, entity.getProvider());
         //合并对象
         BeanUtils.merge(source, entity, LAST_MODIFIED_BY, LAST_MODIFIED_TIME);
         identitySourceRepository.save(entity);
-        AuditContext.setTarget(Target.builder().id(entity.getId().toString())
+        AuditContext.setTarget(Target.builder().id(entity.getId()).name(entity.getName())
             .type(TargetType.IDENTITY_SOURCE).build());
         return true;
     }
@@ -227,7 +223,7 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
      * @param strategyConfig {@link String} 策略
      */
     @Override
-    public void updateStrategyConfig(Long id, String strategyConfig) {
+    public void updateStrategyConfig(String id, String strategyConfig) {
         Optional<IdentitySourceEntity> optional = identitySourceRepository.findById(id);
         //用户不存在
         if (optional.isEmpty()) {
@@ -236,8 +232,8 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
             throw new TopIamException(AuditContext.getContent());
         }
         identitySourceRepository.updateStrategyConfig(id, strategyConfig);
-        AuditContext
-            .setTarget(Target.builder().id(id.toString()).type(TargetType.IDENTITY_SOURCE).build());
+        AuditContext.setTarget(Target.builder().id(id).name(optional.get().getName())
+            .type(TargetType.IDENTITY_SOURCE).build());
 
     }
 
@@ -249,27 +245,20 @@ public class IdentitySourceServiceImpl implements IdentitySourceService {
      */
     @Override
     public Boolean identitySourceConfigValidator(IdentitySourceConfigValidatorParam param) {
-        switch (param.getProvider()) {
+        return switch (param.getProvider()) {
             //钉钉
-            case DINGTALK: {
+            case DINGTALK -> {
                 DingTalkConfig config = JSONObject.parseObject(param.getConfig().toJSONString(),
-                    DingTalkConfig.class);
-                return new DingTalkConfigValidator().validate(config);
+                        DingTalkConfig.class);
+                yield new DingTalkConfigValidator().validate(config);
             }
-            case FEISHU: {
+            case FEISHU -> {
                 FeiShuConfig config = JSONObject.parseObject(param.getConfig().toJSONString(),
-                    FeiShuConfig.class);
-                return new FeiShuConfigValidator().validate(config);
+                        FeiShuConfig.class);
+                yield new FeiShuConfigValidator().validate(config);
             }
-            case WECHAT_WORK: {
-                WeChatWorkConfig config = JSONObject.parseObject(param.getConfig().toJSONString(),
-                    WeChatWorkConfig.class);
-                return new WeChatWorkConfigValidator().validate(config);
-            }
-            default: {
-                throw new TopIamException("暂未支持此提供商连接验证");
-            }
-        }
+            default -> throw new TopIamException("暂未支持此提供商连接验证");
+        };
     }
 
     /**

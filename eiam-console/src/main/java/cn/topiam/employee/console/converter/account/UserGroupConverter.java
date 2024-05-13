@@ -23,13 +23,11 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Lists;
-import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Predicate;
 
-import cn.topiam.employee.common.entity.account.QUserGroupEntity;
 import cn.topiam.employee.common.entity.account.UserEntity;
 import cn.topiam.employee.common.entity.account.UserGroupEntity;
 import cn.topiam.employee.common.entity.account.po.UserPO;
@@ -39,8 +37,13 @@ import cn.topiam.employee.console.pojo.result.account.UserGroupMemberListResult;
 import cn.topiam.employee.console.pojo.result.account.UserGroupResult;
 import cn.topiam.employee.console.pojo.save.account.UserGroupCreateParam;
 import cn.topiam.employee.console.pojo.update.account.UserGroupUpdateParam;
-import cn.topiam.employee.support.context.ApplicationContextHelp;
+import cn.topiam.employee.support.context.ApplicationContextService;
 import cn.topiam.employee.support.repository.page.domain.Page;
+
+import jakarta.persistence.criteria.Predicate;
+import static cn.topiam.employee.common.entity.account.UserGroupEntity.CODE_FIELD_NAME;
+import static cn.topiam.employee.common.entity.account.UserGroupEntity.NAME_FIELD_NAME;
+import static cn.topiam.employee.support.repository.base.BaseEntity.LAST_MODIFIED_TIME;
 
 /**
  * 用户映射
@@ -62,7 +65,8 @@ public interface UserGroupConverter {
         if (!CollectionUtils.isEmpty(page.getContent())) {
             List<UserGroupListResult> list = new ArrayList<>();
             for (UserGroupEntity user : page.getContent()) {
-                UserGroupConverter bean = ApplicationContextHelp.getBean(UserGroupConverter.class);
+                UserGroupConverter bean = ApplicationContextService
+                    .getBean(UserGroupConverter.class);
                 list.add(bean.entityConvertToUserGroupPaginationResult(user));
             }
 
@@ -115,7 +119,7 @@ public interface UserGroupConverter {
      * @param param {@link UserGroupCreateParam}
      * @return {@link UserEntity}
      */
-    @Mapping(target = "deleted", ignore = true)
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "updateBy", ignore = true)
@@ -130,7 +134,6 @@ public interface UserGroupConverter {
      * @return {@link UserEntity} 用户实体
      */
 
-    @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "updateBy", ignore = true)
@@ -147,21 +150,26 @@ public interface UserGroupConverter {
     UserGroupMemberListResult userPoConvertToGroupMemberListResult(UserPO user);
 
     /**
-     * 查询用户组列表参数转换为  Querydsl  Predicate
+     * 查询用户组列表参数转换为  Specification
      *
-     * @param query {@link UserGroupListQuery} query
+     * @param listQuery {@link UserGroupListQuery} query
      * @return {@link Predicate}
      */
-    default Predicate queryUserGroupListParamConvertToPredicate(UserGroupListQuery query) {
-        QUserGroupEntity userGroup = QUserGroupEntity.userGroupEntity;
-        Predicate predicate = ExpressionUtils.and(userGroup.isNotNull(),
-            userGroup.deleted.eq(Boolean.FALSE));
-        //查询条件
+    default Specification<UserGroupEntity> queryUserGroupListParamConvertToSpecification(UserGroupListQuery listQuery) {
         //@formatter:off
-        predicate = StringUtils.isBlank(query.getName()) ? predicate : ExpressionUtils.and(predicate, userGroup.name.like("%" + query.getName() + "%"));
-        predicate = StringUtils.isBlank(query.getCode()) ? predicate : ExpressionUtils.and(predicate, userGroup.code.eq(query.getCode()));
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (StringUtils.isNotBlank(listQuery.getName())) {
+                predicates.add(cb.like(root.get(NAME_FIELD_NAME), listQuery.getName()));
+            }
+            if (StringUtils.isNotBlank(listQuery.getCode())) {
+                predicates.add(cb.like(root.get(CODE_FIELD_NAME), listQuery.getCode()));
+            }
+            query.where(predicates.toArray(new Predicate[0]));
+            query.orderBy(cb.desc(root.get(LAST_MODIFIED_TIME)));
+            return query.getRestriction();
+        };
         //@formatter:on
-        return predicate;
     }
 
     /**
